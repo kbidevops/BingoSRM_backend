@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.syscharger.dao.SysChargerMapper">
+
+	<insert id="create" parameterType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO">
+
+			INSERT INTO TB_SYS_CHARGER( SYS_CODE
+			 							, USER_ID)
+								VALUES ( #{sysCode}
+										 , #{userId})	
+
+	</insert>
+
+	<delete id="deleteList">
+			DELETE FROM TB_SYS_CHARGER
+			WHERE USER_ID = #{userId}
+	</delete>
+	
+	<select id="retrieveList" parameterType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO" resultType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO">
+			SELECT SC.CMMN_CODE sysCode
+			     , SC.CMMN_CODE_NM sysCodeNm
+			     , AA.USER_ID userId
+			  FROM TB_CMMN_CODE SC
+			       LEFT OUTER JOIN TB_SYS_CHARGER AA
+			          ON SC.CMMN_CODE = AA.SYS_CODE
+			          AND AA.USER_ID = #{userId}
+			<include refid="retreieveListWhere" />
+	      ORDER BY SC.CMMN_CODE ASC
+	</select>
+	
+	<sql id="retreieveListWhere">
+		<where>
+			SC.CMMN_CODE_TY = 'A0'
+			AND SC.DELETE_YN = 'N'
+		</where>
+	</sql>
+	
+	<select id="retrieveAssignList" parameterType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO" resultType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO">
+
+			SELECT SC.CMMN_CODE sysCode
+			     , SC.CMMN_CODE_NM sysCodeNm
+			     , AA.USER_ID userId
+			  FROM TB_CMMN_CODE SC
+			   JOIN TB_SYS_CHARGER AA
+			      ON SC.CMMN_CODE = AA.SYS_CODE
+			 WHERE SC.CMMN_CODE_TY = 'A0'
+			   AND SC.DELETE_YN = 'N'
+			 <if test="userId != null and userId != ''">
+			 	AND AA.USER_ID = #{userId}
+			 </if>
+	      ORDER BY SC.CMMN_CODE ASC, AA.USER_ID 
+	</select>
+	
+	<select id="retrieveChargerList" parameterType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO" resultType="kr.go.smplatform.itsm.syscharger.vo.SysChargerVO">
+			SELECT SC.CMMN_CODE sysCode
+			     , SC.CMMN_CODE_NM sysCodeNm
+			     , AA.USER_ID userId
+			     , LI.MOBLPHON moblphon
+			  FROM TB_CMMN_CODE SC
+			   JOIN TB_SYS_CHARGER AA
+			      ON SC.CMMN_CODE = AA.SYS_CODE
+				JOIN TB_LOGIN_INFO LI
+                  ON AA.USER_ID = LI.USER_ID
+			 WHERE SC.CMMN_CODE_TY = 'A0'
+			   AND SC.DELETE_YN = 'N'
+			   <if test="sysCode != null and sysCode != ''">
+			 	AND SC.CMMN_CODE = #{sysCode}
+			   </if>
+                AND LI.USER_STTUS_CODE = 'U002'
+	      ORDER BY SC.CMMN_CODE ASC, AA.USER_ID 
+	</select>
+	
+</mapper>

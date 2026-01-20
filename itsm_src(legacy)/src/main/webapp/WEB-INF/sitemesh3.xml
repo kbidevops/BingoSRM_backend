@@ -1,0 +1,27 @@
+<sitemesh>
+  <mapping decorator="/WEB-INF/decorator/default-decorator3.jsp"/>
+  
+  
+  <!-- Map decorators to path patterns. -->
+  <mapping path="/login/*" decorator="/WEB-INF/decorator/popup-decorator2.jsp"/>
+  <mapping path="/rep/master/mngr/Oz*" decorator="/WEB-INF/decorator/popup-decorator2.jsp"/>
+<!--   <mapping path="*.html" decorator="/WEB-INF/decorator/popup-decorator2.jsp"/> -->
+<!--   <mapping path="/itsm/user/site/*" decorator="/WEB-INF/decorator/popup-decorator.jsp"/> -->
+  
+<!--   <mapping path="/admin/*" decorator="/another-decorator.html"/> -->
+<!--   <mapping path="/*.special.jsp" decorator="/special-decorator.html"/> -->
+
+  <!-- Alternative convention. This is more verbose but allows multiple decorators
+       to be applied to a single path. -->
+<!--   <mapping> -->
+<!--     <path>/articles/*</path> -->
+<!--     <decorator>/decorators/article.html</decorator> -->
+<!--     <decorator>/decorators/two-page-layout.html</decorator> -->
+<!--     <decorator>/decorators/common.html</decorator> -->
+<!--   </mapping> -->
+
+  
+  <!-- Exclude path from decoration. -->
+  <mapping path="*Div.do" exclue="true"/>
+  
+</sitemesh>

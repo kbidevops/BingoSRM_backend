@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.wdtb.dao.WdtbMapper">
+	<sql id="retrieveSelect">
+	SELECT 
+		@rownum:=@rownum+1 as rowNum,
+		SR.TRGET_SRVC_CODE trgetSrvcCode,
+		SR.RQESTER_1ST_NM rqester1stNm,
+		SR.RQESTER_1ST_PSITN rqester1stPsitn,
+		SR.SRVC_RSPONS_SJ srvcRsponsSj,
+		SR.SRVC_RSPONS_CN srvcRsponsCn,
+		SR.PROGRM_UPDT_YN progrmUpdtYn,
+		SR.STOP_INSTL_YN stopInstlYn,
+		SR.NONE_STOP_INSTL_YN noneStopInstlYn,
+		SR.INSTL_YN instlYn, 
+		SR.INFRA_OPERT_YN infraOpertYn,
+		SR.FNCT_IMPRVM_NO fnctImprvmNo,
+		CL.CMMN_CODE_NM trgetSrvcCodeNm,
+		CL.CMMN_CODE_SUB_NM3 trgetSrvcCodeSubNm3,
+		LI.USER_NM chargerUserNm,
+		CD.CMMN_CODE_NM cmmnCodeNm,
+		WC.WDTB_CNFIRM_NO wdtbCnfirmNo,
+		WC.WDTB_DT wdtbDt,
+		WC.OPERT_REASON opertReason, 
+		WC.IMPRVM_MATTER imprvmMatter, 
+		WC.WDTB_SE wdtbSe, 
+		WC.WDTB_IP wdtbIp, 
+		WC.WDTB_NO_ONE wdtbNoOne, 
+		WC.WDTB_NO_TWO wdtbNoTwo, 
+		WC.WDTB_DT_ONE wdtbDtOne, 
+		WC.WDTB_DT_TWO wdtbDtTwo, 
+		WC.WDTB_CO_ONE wdtbCoOne, 
+		WC.WDTB_CO_TWO wdtbCoTwo, 
+		WC.ERROR_REASON_ONE errorReasonOne, 
+		WC.ERROR_REASON_TWO errorReasonTwo, 
+		WC.WDTB_ETC wdtbEtc, 
+		WC.PARTCLR_MATTER partclrMatter, 
+		WC.SOLUT_CONECTFL_ID solutConectflId, 
+		WC.OPERT_RESULTFL_ID opertResultflId, 
+		WC.LOGIN_RESULTFL_ID loginResultflId, 
+		WC.SERVER_ONE_LOGFL_ID serverOneLogflId, 
+		WC.SERVER_TWO_LOGFL_ID serverTwoLogflId,
+		WC.NAVIGATION wdtbNavigation,
+		WC.CREAT_ID creatId,
+		WC.UPDT_ID updtId,
+		WC.CREAT_DT creatDt,	
+		WC.UPDT_DT updtDt,
+		WC.DELETE_YN deleteYn,
+		WC.CONFIRM_USR confirmUsr
+	FROM (select @rownum:=0) TMP,
+		  TB_WDTB_CNFIRM WC
+	LEFT OUTER JOIN TB_SRVC_RSPONS SR
+                 ON WC.WDTB_CNFIRM_NO = SR.WDTB_CNFIRM_NO
+	LEFT OUTER JOIN TB_LOGIN_INFO LI
+                 ON SR.CHARGER_ID = LI.USER_ID
+	LEFT OUTER JOIN TB_CMMN_CODE CL
+                 ON SR.TRGET_SRVC_CODE = CL.CMMN_CODE
+	LEFT OUTER JOIN TB_CMMN_CODE CD
+                 ON WC.WDTB_SE = CD.CMMN_CODE
+	</sql>
+	
+	<sql id="retrievePagingListWhere">
+	<where>
+			WC.DELETE_YN = 'N'
+		<if test="wdtbCnfirmNo != null and wdtbCnfirmNo != ''">
+			AND WC.WDTB_CNFIRM_NO LIKE CONCAT('%', #{wdtbCnfirmNo},'%')
+		</if>
+		<if test="chargerId != null and chargerId != ''">
+			AND SR.CHARGER_ID = #{chargerId} 
+		</if>
+		<if test="trgetSrvcCode != null and trgetSrvcCode != ''">
+			AND SR.TRGET_SRVC_CODE = #{trgetSrvcCode}
+		</if>
+		<if test="wdtbDt != null and wdtbDt != ''">
+			AND DATE_FORMAT(WC.WDTB_DT,'%Y%m%d') = DATE_FORMAT(#{wdtbDt},'%Y%m%d')
+		</if>
+		<if test="srvcRsponsSj != null and srvcRsponsSj != ''">
+		 	AND SR.SRVC_RSPONS_SJ  LIKE CONCAT('%', #{srvcRsponsSj},'%')
+		</if>
+		<if test="srvcRsponsCn != null and srvcRsponsCn != ''">
+		 	AND SR.SRVC_RSPONS_CN  LIKE CONCAT('%', #{srvcRsponsCn},'%')
+		</if>
+	</where>
+	</sql>
+	
+	<select id="retrievePagingList" parameterType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO" resultType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO">
+		<include refid="retrieveSelect" />
+		<include refid="retrievePagingListWhere"/>
+		ORDER BY SR.CREAT_DT DESC
+		limit #{firstIndex}, #{recordCountPerPage}
+	</select>
+	
+	<select id="retrieveList" parameterType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO" resultType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO">
+		<include refid="retrieveSelect" />
+		WHERE 
+			SR.DELETE_YN = 'N'
+		<if test="processMt != null and processMt != ''">
+			AND DATE_FORMAT(SR.CREAT_DT,'%Y%m') = #{processMt}
+		</if>
+		ORDER BY SR.CREAT_DT ASC
+	</select>
+	
+	<select id="retrieve" parameterType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO" resultType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO">
+		<include refid="retrieveSelect" />
+		WHERE 
+			WC.DELETE_YN = 'N'
+		AND 
+			WC.WDTB_CNFIRM_NO = #{wdtbCnfirmNo}
+		<if test="srvcRsponsNo != null and srvcRsponsNo != ''">
+		AND SR.SRVC_RSPONS_NO= #{srvcRsponsNo}
+		</if>
+	</select>
+	
+	<update id="update" parameterType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO">
+		UPDATE TB_WDTB_CNFIRM
+			   SET UPDT_DT = NOW()
+			     , UPDT_ID = #{updtId}
+			     , WDTB_DT = #{wdtbDt}
+				 , OPERT_REASON = #{opertReason} 
+				 , IMPRVM_MATTER = #{imprvmMatter} 
+				 , WDTB_SE = #{wdtbSe} 
+				 , WDTB_IP = #{wdtbIp} 
+				 , WDTB_NO_ONE = #{wdtbNoOne} 
+				 , WDTB_NO_TWO = #{wdtbNoTwo} 
+				 , WDTB_DT_ONE = #{wdtbDtOne} 
+				 , WDTB_DT_TWO = #{wdtbDtTwo} 
+				 , WDTB_CO_ONE = #{wdtbCoOne} 
+				 , WDTB_CO_TWO = #{wdtbCoTwo} 
+				 , ERROR_REASON_ONE = #{errorReasonOne} 
+				 , ERROR_REASON_TWO = #{errorReasonTwo} 
+				 , WDTB_ETC = #{wdtbEtc} 
+				 , PARTCLR_MATTER = #{partclrMatter} 
+				 , SOLUT_CONECTFL_ID = #{solutConectflId} 
+				 , OPERT_RESULTFL_ID = #{opertResultflId} 
+				 , LOGIN_RESULTFL_ID = #{loginResultflId} 
+				 , SERVER_ONE_LOGFL_ID = #{serverOneLogflId} 
+				 , SERVER_TWO_LOGFL_ID = #{serverTwoLogflId}
+				 , NAVIGATION = #{wdtbNavigation}
+			   	 , CONFIRM_USR = #{confirmUsr}
+			WHERE WDTB_CNFIRM_NO = #{wdtbCnfirmNo}
+	</update>
+	
+	<delete id="delete" parameterType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO">
+		UPDATE TB_WDTB_CNFIRM
+			   SET UPDT_DT = NOW()
+			     , UPDT_ID = #{updtId}
+			     , DELETE_YN = 'Y'
+		 WHERE WDTB_CNFIRM_NO = #{wdtbCnfirmNo}
+	</delete>
+	
+	<insert id="create" useGeneratedKeys="true" keyProperty="wdtbCnfirmNo" keyColumn="WDTB_CNFIRM_NO" parameterType="kr.go.smplatform.itsm.wdtb.vo.WdtbVO">
+	<selectKey keyProperty="wdtbCnfirmNo"  resultType="String" order="BEFORE">
+			SELECT
+				 ifnull(
+				   (SELECT
+				     CONCAT(
+				       substring(
+				         MAX(WDTB_CNFIRM_NO)
+				        ,1
+				        ,7)
+				      ,LPAD(
+				         CAST(
+				           substring(
+				             MAX(WDTB_CNFIRM_NO)
+				            ,9) AS UNSIGNED) +
+				         1
+				        ,3
+				        ,'0'))
+				    FROM
+				     TB_WDTB_CNFIRM
+				    WHERE
+				     WDTB_CNFIRM_NO LIKE
+				       concat(
+				         'R-'
+				        ,date_format(
+				           now()
+				          ,'%y%m')
+				        ,'-%'))
+				  ,concat(
+				     'R-'
+				    ,date_format(
+				       now()
+				      ,'%y%m')
+				    ,'-001'))
+				   wdtbCnfirmNo
+	</selectKey>
+	INSERT INTO TB_WDTB_CNFIRM(  WDTB_CNFIRM_NO
+							   , WDTB_DT
+							   , OPERT_REASON
+							   , IMPRVM_MATTER
+							   , WDTB_SE 
+							   , WDTB_IP
+							   , WDTB_NO_ONE
+							   , WDTB_NO_TWO
+							   , WDTB_DT_ONE
+							   , WDTB_DT_TWO
+							   , WDTB_CO_ONE
+							   , WDTB_CO_TWO
+							   , ERROR_REASON_ONE
+							   , ERROR_REASON_TWO
+							   , WDTB_ETC
+							   , PARTCLR_MATTER
+							   , SOLUT_CONECTFL_ID
+							   , OPERT_RESULTFL_ID
+							   , LOGIN_RESULTFL_ID
+							   , SERVER_ONE_LOGFL_ID
+							   , SERVER_TWO_LOGFL_ID
+							   , NAVIGATION
+			                   , CREAT_ID
+			                   , CREAT_DT
+			                   , DELETE_YN
+			                   , CONFIRM_USR
+			                   )
+			VALUES (  #{wdtbCnfirmNo}
+				    , #{wdtbDt}
+				    , #{opertReason} 
+				    , #{imprvmMatter} 
+				    , #{wdtbSe} 
+				    , #{wdtbIp} 
+				    , #{wdtbNoOne} 
+				    , #{wdtbNoTwo} 
+				    , #{wdtbDtOne} 
+				    , #{wdtbDtTwo} 
+				    , #{wdtbCoOne} 
+				    , #{wdtbCoTwo} 
+				    , #{errorReasonOne} 
+				    , #{errorReasonTwo} 
+				    , #{wdtbEtc} 
+				    , #{partclrMatter} 
+				    , #{solutConectflId} 
+				    , #{opertResultflId} 
+				    , #{loginResultflId} 
+				    , #{serverOneLogflId} 
+				    , #{serverTwoLogflId}
+				    , #{wdtbNavigation}
+			        , #{creatId}
+			        , NOW()
+			        , 'N'
+			        , #{confirmUsr}
+			        )
+	</insert>
+	
+</mapper>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.progrm.dao.ProgrmMapper">
+
+    <insert id="create" parameterType="kr.go.smplatform.itsm.progrm.vo.ProgrmVO">
+        <selectKey keyProperty="progrmSn" resultType="string" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+            INSERT INTO TB_PROGRM(PROGRM_NM
+                                    , PROGRM_URI
+                                    , UPPER_PROGRM_SN
+                                    , SORT_NO
+                                    , MENU_INDICT_YN
+                                    , CREAT_DT
+                                    , CREAT_ID
+                                    , UPDT_DT
+                                    , UPDT_ID
+                                    , DELETE_YN)
+                        VALUES (#{progrmNm}
+                              , #{progrmUri}
+                              , #{upperProgrmSn}
+                              , #{sortNo}
+                              , #{menuIndictYn}
+                              , NOW()
+                              , #{creatId}
+                              , NOW()
+                              , #{creatId}
+                              , #{deleteYn})
+
+    </insert>
+
+    <update id="update">
+
+            UPDATE TB_PROGRM
+               SET UPDT_DT = NOW()
+                 , UPDT_ID = #{updtId}
+                <if test="progrmNm != null and progrmNm != ''">
+                    , PROGRM_NM = #{progrmNm}
+                </if>
+                <if test="progrmUri != null and progrmUri != ''">
+                    , PROGRM_URI = #{progrmUri}
+                </if>
+                <if test="sortNo != null and sortNo != ''">
+                    , SORT_NO = #{sortNo}
+                </if>
+                <if test="menuIndictYn != null and menuIndictYn != ''">
+                    , MENU_INDICT_YN = #{menuIndictYn}
+                </if>
+            WHERE PROGRM_SN = #{progrmSn}
+    </update>
+
+    <delete id="delete">
+            UPDATE TB_PROGRM
+               SET DELETE_YN = 'Y'
+            WHERE PROGRM_SN = #{progrmSn}
+
+    </delete>
+
+    <select id="retrieve" resultType="kr.go.smplatform.itsm.progrm.vo.ProgrmVO">
+
+            SELECT PG.PROGRM_SN progrmSn
+                 , PG.PROGRM_NM progrmNm
+                 , PG.PROGRM_URI progrmUri
+                 , PG.UPPER_PROGRM_SN upperProgrmSn
+                 , PG.SORT_NO sortNo
+                 , PG.MENU_INDICT_YN menuIndictYn
+                 , PG.CREAT_DT creatDt
+                 , PG.CREAT_ID creatId
+                 , LC.USER_NM creatUserNm
+                 , PG.UPDT_DT updtDt
+                 , PG.UPDT_ID updtId
+                 , LU.USER_NM updtUserNm
+                 , PG.DELETE_YN deleteYn
+              FROM TB_PROGRM PG
+                   LEFT OUTER JOIN TB_LOGIN_INFO LC ON PG.CREAT_ID = LC.USER_ID
+                   LEFT OUTER JOIN TB_LOGIN_INFO LU ON PG.UPDT_ID = LU.USER_ID
+             WHERE PG.PROGRM_SN = #{progrmSn}
+
+    </select>
+
+    <select id="retrieveList" parameterType="kr.go.smplatform.itsm.progrm.vo.ProgrmVO" resultType="kr.go.smplatform.itsm.progrm.vo.ProgrmVO">
+            SELECT PG.PROGRM_SN progrmSn
+                 , PG.PROGRM_NM progrmNm
+                 , PG.PROGRM_URI progrmUri
+                 , PG.UPPER_PROGRM_SN upperProgrmSn
+                 , PG.SORT_NO sortNo
+                 , PG.MENU_INDICT_YN menuIndictYn
+                 , PG.CREAT_DT creatDt
+                 , PG.CREAT_ID creatId
+                 , LC.USER_NM creatUserNm
+                 , PG.UPDT_DT updtDt
+                 , PG.UPDT_ID updtId
+                 , LU.USER_NM updtUserNm
+                 , PG.DELETE_YN deleteYn
+              FROM TB_PROGRM PG
+                   LEFT OUTER JOIN TB_LOGIN_INFO LC ON PG.CREAT_ID = LC.USER_ID
+                   LEFT OUTER JOIN TB_LOGIN_INFO LU ON PG.UPDT_ID = LU.USER_ID
+             <where>
+                 <if test="progrmNm != null and progrmNm != ''">
+                    AND PG.PROGRM_NM = #{progrmNm}
+                 </if>
+                 <if test="progrmUri != null and progrmUri != ''">
+                    AND PG.PROGRM_URI = #{progrmUri}
+                 </if>
+                 <if test="deleteYn != null and deleteYn != ''">
+                    AND PG.DELETE_YN = #{deleteYn}
+                 </if>
+            </where>
+            ORDER BY PG.UPPER_PROGRM_SN ASC, PG.SORT_NO ASC
+    </select>
+
+</mapper>

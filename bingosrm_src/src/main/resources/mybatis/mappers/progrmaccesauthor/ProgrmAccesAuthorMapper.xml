@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.progrmaccesauthor.dao.ProgrmAccesAuthorMapper">
+
+    <insert id="create" parameterType="kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO">
+            INSERT INTO TB_PROGRM_ACCES_AUTHOR( PROGRM_SN
+                                              , PROGRM_ACCES_AUTHOR_CODE)
+                                        VALUES ( #{progrmSn}
+                                              , #{progrmAccesAuthorCode})
+    </insert>
+
+    <delete id="deleteList">
+            DELETE FROM TB_PROGRM_ACCES_AUTHOR
+            WHERE PROGRM_ACCES_AUTHOR_CODE = #{progrmAccesAuthorCode}
+
+    </delete>
+
+    <select id="retrieveList" parameterType="kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO" resultType="kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO">
+
+            SELECT PG.PROGRM_SN progrmSn
+                 , PG.PROGRM_NM progrmNm
+                 ,CASE
+                       WHEN PG.UPPER_PROGRM_SN = '0'
+                       THEN
+                         (SELECT
+                           IA.PROGRM_URI
+                          FROM
+                           TB_PROGRM IA
+                           JOIN TB_PROGRM_ACCES_AUTHOR IB ON IA.PROGRM_SN = IB.PROGRM_SN
+                           and IA.MENU_INDICT_YN = 'Y'
+                          WHERE
+                           IA.UPPER_PROGRM_SN = AA.PROGRM_SN AND
+                           IB.PROGRM_ACCES_AUTHOR_CODE = AA.PROGRM_ACCES_AUTHOR_CODE
+                          ORDER BY
+                           IA.SORT_NO ASC
+                          LIMIT
+                           1)
+                       ELSE
+                         PG.PROGRM_URI
+                     END
+                       progrmUri
+                 , PG.UPPER_PROGRM_SN upperProgrmSn
+                 , PG.SORT_NO sortNo
+                 , PG.MENU_INDICT_YN menuIndictYn
+                 , AA.PROGRM_ACCES_AUTHOR_CODE progrmAccesAuthorCode
+              FROM TB_PROGRM PG
+                   LEFT OUTER JOIN TB_PROGRM_ACCES_AUTHOR AA
+                      ON PG.PROGRM_SN = AA.PROGRM_SN
+                      AND AA.PROGRM_ACCES_AUTHOR_CODE = #{progrmAccesAuthorCode}
+             WHERE DELETE_YN = 'N'
+          ORDER BY PG.UPPER_PROGRM_SN ASC, PG.SORT_NO ASC
+    </select>
+
+    <select id="retrieveAssignList" parameterType="kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO" resultType="kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO">
+
+            SELECT PG.PROGRM_SN progrmSn
+                 , PG.PROGRM_NM progrmNm
+                 ,CASE
+                       WHEN PG.UPPER_PROGRM_SN = '0'
+                       THEN
+                         (SELECT
+                           IA.PROGRM_URI
+                          FROM
+                           TB_PROGRM IA
+                           JOIN TB_PROGRM_ACCES_AUTHOR IB ON IA.PROGRM_SN = IB.PROGRM_SN
+                           and IA.MENU_INDICT_YN = 'Y'
+                          WHERE
+                           IA.UPPER_PROGRM_SN = AA.PROGRM_SN AND
+                           IB.PROGRM_ACCES_AUTHOR_CODE = AA.PROGRM_ACCES_AUTHOR_CODE
+                          ORDER BY
+                           IA.SORT_NO ASC
+                          LIMIT
+                           1)
+                       ELSE
+                         PG.PROGRM_URI
+                     END
+                       progrmUri
+                 , PG.UPPER_PROGRM_SN upperProgrmSn
+                 , PG.SORT_NO sortNo
+                 , PG.MENU_INDICT_YN menuIndictYn
+                 , AA.PROGRM_ACCES_AUTHOR_CODE progrmAccesAuthorCode
+              FROM TB_PROGRM PG
+                   JOIN TB_PROGRM_ACCES_AUTHOR AA
+                      ON PG.PROGRM_SN = AA.PROGRM_SN
+                      AND AA.PROGRM_ACCES_AUTHOR_CODE = #{progrmAccesAuthorCode}
+             WHERE DELETE_YN = 'N'
+          ORDER BY PG.UPPER_PROGRM_SN ASC, PG.SORT_NO ASC
+    </select>
+</mapper>

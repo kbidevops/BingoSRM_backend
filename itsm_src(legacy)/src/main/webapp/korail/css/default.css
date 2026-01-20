@@ -1,0 +1,171 @@
+@charset "UTF-8";
+@import url("../font/Pretendard/Pretendard.css");
+
+/*-------------------------------------------------
+title       : 초기화
+Author      : YEONA
+Create date : 2025-06
+-------------------------------------------------*/
+*, *::before, *::after { -webkit-box-sizing: inherit; box-sizing: inherit; }
+*{box-sizing: border-box;}
+
+html { -webkit-box-sizing: border-box; box-sizing: border-box; font-size: 10px; -webkit-text-size-adjust: none;-moz-text-size-adjust: none; -ms-text-size-adjust: none;-o-text-size-adjust: none; }
+
+body { position:relative; margin: 0; padding: 0; font-size: 16px; line-height: 1.4; font-family:'Pretendard', sans-serif; font-weight:700; color: #333;word-break:keep-all;min-width:1400px;overflow-y:hidden;}
+
+header, footer, main, section, article, nav, aside { display: block; }
+
+ul, ol, li, dl, dt, dd { margin: 0; padding: 0; list-style: none; }
+
+h1, h2, h3, h4, h5, h6, p, form, figure, figcaption { margin: 0; padding: 0; }
+
+fieldset, hr { display: block; margin: 0; padding: 0; border: 0 none; }
+
+input, select { max-width: 100%; vertical-align: middle; }
+
+input, select, button, textarea, optgroup { margin: 0; font-family: inherit; font-size: inherit; color: inherit; }
+
+select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+
+select::-ms-expand { display: none; }
+
+address, em, i { font-style: normal; }
+
+strong { font-weight: 600; }
+
+a { color: inherit; text-decoration: none; }
+
+button { padding: 0; border: 0 none; background: none; cursor: pointer; }
+
+input[type='submit'] { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+
+img { max-width: 100%; border: 0 none; font-size: 0; vertical-align: middle; }
+
+table { width: 100%; border-collapse: collapse; }
+
+caption, legend, .sr_only, .sr-only, .hidden, .blind, .IR { overflow: hidden; position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0 none; clip: rect(0, 0, 0, 0); }
+
+/* 로그인 화면 컨테이너 */
+.container {
+    height: 100vh;
+    width: 100%;
+    max-width: 100% !important;
+    background: url(../images/login_bg.png) no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* 로그인 래퍼 */
+.login-wrapper {
+    width: 1200px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-left: 660px;
+    height: 640px;
+    transform-origin: center center;
+}
+
+/* 로고 영역 */
+.login-logo {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 660px;
+    height: 100%;
+}
+
+/* 로그인 박스 */
+.login-box {
+    height: 100%;
+    padding: 64px;
+}
+
+/* 로그인 제목 */
+.login-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2B1356;
+    margin-bottom: 32px;
+    text-align: left;
+}
+
+/* 로그인 폼 */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* 폼 그룹 */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 라벨 */
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #757575;
+    margin-bottom: 6px;
+}
+
+/* 입력 필드 */
+.form-group input {
+    width: 100%;
+    height: 56px;
+    padding: 0 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #333;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+/* 로그인 버튼 */
+.login-btn {
+    width: 100%;
+    height: 60px;
+    background: #1C3FCD;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.login-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+/* 저작권 */
+.copyright {
+    text-align: center;
+    font-size: 14px;
+    color: #9ca3af;
+    margin-top: 110px;
+    font-weight: 400;
+}

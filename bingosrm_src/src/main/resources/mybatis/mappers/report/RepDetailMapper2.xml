@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.report.dao.RepDetailMapper2">
+    <select id="selectSolarList" resultType="kr.go.smplatform.itsm.cmmncode.vo.CmmnCodeVO">
+        SELECT  CMMN_CODE_NM as cmmnCodeNm
+        FROM    TB_CMMN_CODE
+        WHERE   CMMN_CODE_SUB_NM1 = '양력'
+    </select>
+
+    <select id="selectLunarList" resultType="kr.go.smplatform.itsm.cmmncode.vo.CmmnCodeVO">
+        SELECT  CMMN_CODE_NM as cmmnCodeNm
+        FROM    TB_CMMN_CODE
+        WHERE   CMMN_CODE_SUB_NM1 = '음력'
+    </select>
+
+    <select id="selectAttitudeList" resultType="kr.go.smplatform.itsm.report.vo.RepAttitudeVO">
+        select  cc.CMMN_CODE as attitudeCode
+                , cc.CMMN_CODE_NM as attitudeName
+                , if(ra.attd_dt is null, false, true) as attitudePick
+        from    (
+            select  '-' CMMN_CODE
+                 , '근무' CMMN_CODE_NM
+                 , 'B2' CMMN_CODE_TY
+                 , 'N' DELETE_YN
+            from    dual
+            union
+            select  CMMN_CODE
+                    , CMMN_CODE_NM
+                    , CMMN_CODE_TY
+                    , DELETE_YN
+            from    TB_CMMN_CODE
+            where   CMMN_CODE_TY = 'B2'
+              and   DELETE_YN = 'N'
+            order by CMMN_CODE
+        ) cc
+        left join TB_REP_ATTD ra
+            on  cc.CMMN_CODE = ra.attd_code
+            and ra.user_id = #{userId}
+            and ra.attd_dt = #{attitudeDt}
+        left join TB_LOGIN_INFO li
+            on  ra.user_id = li.USER_ID
+    </select>
+
+    <select id="selectRepSnByCodeAndReportDt" resultType="String">
+        select  rep_sn
+        from    TB_REP_MASTER
+        where   delete_YN = 'N'
+        and     rep_ty_code = #{repTyCode}
+        and     report_dt = #{reportDt}
+        order by    rep_sn desc
+        limit   1
+    </select>
+
+    <select id="selectIsConfirmed" resultType="Boolean">
+        select  sttus_code = 'B303' or sttus_code = 'B302' as result
+        from    TB_REP_MASTER
+        where   rep_sn = #{repSn}
+        union
+        select  false as result
+        limit   1
+    </select>
+
+    <select id="selectLastRepSn" resultType="int">
+        SELECT  repSn
+        FROM    (
+            SELECT  rep_sn as repSn
+            FROM    TB_REP_MASTER
+            WHERE   rep_ty_code = #{repTyCode}
+            AND     DATE_FORMAT(REPORT_DT, '%Y%m%d') <![CDATA[<]]>  DATE_FORMAT(#{reportDt}, '%Y%m%d')
+            order by repSn desc
+            limit 1
+        ) A
+        union
+        SELECT  repSn
+        FROM    (
+            SELECT  rep_sn as repSn
+            FROM    TB_REP_MASTER
+            WHERE   rep_ty_code = #{repTyCode}
+            order by repSn desc
+            limit 1
+        ) B
+        LIMIT   1
+    </select>
+
+    <select id="selectMasterInfo" resultType="kr.go.smplatform.itsm.report.vo.RepMasterVO2">
+        SELECT  rep_nm as repName
+                , rep_ty_code as repTyCode
+                , date_format(report_dt, '%Y-%m-%d') as reportDt
+        FROM    TB_REP_MASTER
+        WHERE   rep_sn = #{repSn}
+        AND     delete_yn = 'N'
+    </select>
+
+    <select id="selectDetailList" resultType="kr.go.smplatform.itsm.report.vo.RepDetailVO2">
+        SELECT  rd.sys_code as assignCode
+                , cc.CMMN_CODE_NM as assignName
+                , rd.exec_desc as execDesc
+                , rd.plan_desc as planDesc
+        FROM    TB_REP_DETAIL rd
+        LEFT JOIN   TB_CMMN_CODE cc
+            ON cc.CMMN_CODE = rd.sys_code
+        WHERE   rd.rep_sn = #{repSn}
+        AND     rd.user_id = #{userId}
+        AND     rd.sys_code != 'B100'
+        AND     rd.delete_yn = 'N'
+    </select>
+
+    <select id="selectAttachment" resultType="kr.go.smplatform.itsm.report.vo.CRRepAttachmentVO">
+        SELECT  rep_sn as repSn
+                , user_id as userId
+                , required_file as requiredFile
+                , additional_file as additionalFile
+        FROM    TB_REP_ATCHMNFL
+        WHERE   rep_sn = #{repSn}
+        <if test="userId != null and userId != ''">
+            AND user_id = #{userId}
+        </if>
+    </select>
+
+    <select id="selectAttachmentNameAndSize" resultType="kr.go.smplatform.itsm.report.vo.RepAttachmentNameAndSizeVO">
+        SELECT  tra.required_file as requiredFileId
+                , ta1.ORGINL_FILE_NM as requiredFileName
+                , ta1.FILE_SIZE as requiredFileSize
+                , tra.additional_file as additionalFileId
+                , ta2.ORGINL_FILE_NM as additionalFileName
+                , ta2.FILE_SIZE as additionalFileSize
+
+                , tra.rep_sn as repSn
+                , tra.user_id as userId
+        FROM    TB_REP_ATCHMNFL tra
+        LEFT JOIN   TB_ATCHMNFL ta1
+            ON  tra.required_file = ta1.atchmnfl_ID
+            AND ta1.atchmnfl_SN = 1
+        LEFT JOIN   TB_ATCHMNFL ta2
+            ON  tra.additional_file = ta2.atchmnfl_ID
+            AND ta2.atchmnfl_SN = 1
+        WHERE   rep_sn = #{repSn}
+        <if test="userId != null and userId != ''">
+            AND user_id = #{userId}
+        </if>
+    </select>
+
+    <insert id="insertOrUpdateAttachment">
+        insert into TB_REP_ATCHMNFL (rep_sn, user_id, required_file, additional_file)
+        value (
+            #{repSn}, #{userId}, #{requiredFile}, #{additionalFile}
+        ) on duplicate key update
+               required_file = ifnull(#{requiredFile}, required_file)
+                , additional_file = ifnull(#{additionalFile}, additional_file)
+    </insert>
+
+    <update id="removeAdditionalFile">
+        UPDATE  TB_REP_ATCHMNFL
+        SET     additional_file = null
+        WHERE   rep_sn = #{repSn}
+        AND     user_id = #{userId}
+    </update>
+
+    <select id="selectAssignList" resultType="kr.go.smplatform.itsm.report.vo.RepAssignVO">
+        SELECT  cc.CMMN_CODE assignCode
+                , cc.CMMN_CODE_NM as assignName
+        FROM    TB_REP_CHARGER rc
+        JOIN    TB_CMMN_CODE cc
+            ON  cc.CMMN_CODE = rc.sys_code
+            and cc.DELETE_YN = 'N'
+            and substring(cc.CMMN_CODE, 3, 1) = substring(#{repTyCode}, 4, 1)
+        WHERE   rc.user_id = #{userId}
+        AND     rc.delete_YN = 'N'
+        AND     rc.sys_code != 'B100'
+    </select>
+
+<!--    등록/수정-->
+    <insert id="insertMaster">
+        insert into TB_REP_MASTER(
+            rep_nm
+            , rep_ty_code
+            , report_dt
+            , creat_dt
+            , creat_id
+            , sttus_code
+            , confirm_usr
+        )
+        values (
+            #{reportName}
+            , #{repTyCode}
+            , #{reportDt}
+            , now()
+            , (select user_id
+               from tb_rep_charger
+               where sys_code = concat('B1', substring(#{repTyCode}, 4, 1), '0')
+                 and delete_YN = 'N'
+               order by user_id
+                limit 1)
+            , 'B301'
+            , (select user_id
+               from tb_rep_charger
+               where sys_code = concat('B1', substring(#{repTyCode}, 4, 1), '0')
+                 and delete_YN = 'N'
+               order by user_id
+                limit 1)
+        )
+    </insert>
+
+    <delete id="deleteDetails">
+        delete from TB_REP_DETAIL
+        where   rep_sn = #{repSn}
+        and     user_id = #{userId}
+    </delete>
+
+    <insert id="insertDetail">
+        insert into TB_REP_DETAIL (
+            rep_sn
+            , sys_code
+            , user_id
+            , exec_desc
+            , plan_desc
+            , creat_dt
+            , creat_id
+        )
+        select  #{repSn}
+                , #{sysCode}
+                , #{userId}
+                , #{currentDescription}
+                , #{planDescription}
+                , now()
+                , #{userId}
+        from    dual
+        where   true = (
+            select  count(1) > 0
+            from    tb_rep_charger
+            where   (sys_code = #{sysCode}
+            and     user_id = #{userId})
+            or      #{userId} = 'admin')
+        on duplicate key update
+            exec_desc = #{currentDescription}
+            , plan_desc = #{planDescription}
+            , updt_dt = now()
+            , updt_id = #{userId}
+    </insert>
+
+    <insert id="insertAttitude">
+        insert into TB_REP_ATTD (
+            user_id
+            , attd_code
+            , attd_dt
+            , creat_dt
+        )
+        value (
+           #{userId}
+           , #{attitudeCode}
+           , #{attitudeDt}
+           , now()
+        )
+        on duplicate key update
+            attd_code = #{attitudeCode}
+    </insert>
+</mapper>

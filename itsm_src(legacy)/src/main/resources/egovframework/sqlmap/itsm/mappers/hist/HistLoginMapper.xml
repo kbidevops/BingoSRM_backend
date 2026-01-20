@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.hist.login.dao.HistLoginMapper">
+
+	<insert id="create" parameterType="kr.go.smplatform.itsm.hist.login.vo.HistLoginVO">
+
+			INSERT INTO TB_LOGIN_HIST(SESSION_ID
+									, USER_ID
+			                        , LOGIN_DT			                        
+			                        , USER_TY_CODE			                        
+			                        , CONECT_IP)
+			VALUES (#{sessionId}
+			      , #{userId}
+			      , NOW()
+			      , #{userTyCode}
+			      , #{conectIp}
+			      )
+
+	</insert>
+
+	<update id="update">
+			UPDATE TB_LOGIN_HIST
+			   SET LOGOUT_DT = NOW()
+			     , LOGOUT_STTUS_CODE = #{logoutSttusCode}
+			WHERE SESSION_ID= #{sessionId}
+	</update>
+
+	
+</mapper>

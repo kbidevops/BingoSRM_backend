@@ -1,0 +1,350 @@
+<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib prefix="c"      uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form"   uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="ui"     uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator" %>
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <c:set var="registerFlag" value="${empty repFormVO.repMasterVO.creatId ? 'create' : 'modify'}"/>
+    <c:set var="sttusCode" value="${repFormVO.repMasterVO.sttusCode}"/>
+    <title><c:out value="${LEFT_MENU_PROGRMACCESAUTHORVO.progrmNm}"/> <c:out value="${registerFlag == 'create' ? '등록' : '수정'}"/></title>
+    <!--For Commons Validator Client Side-->
+    <script type="text/javascript" src="<c:url value='/cmmn/validator.do'/>"></script>
+    <script type="text/javascript" src="/smarteditor/js/service/HuskyEZCreator.js" charset="utf-8"></script>
+    <validator:javascript formName="repFormVO" staticJavascript="false" xhtml="true" cdata="false"/>
+</head>
+
+
+<body>
+	<main id="content">
+		<form:form commandName="repFormVO" id="listForm" name="listForm" method="post" enctype="multipart/form-data">
+			<form:hidden path="repMasterVO.pageIndex" />
+			<form:hidden path="repMasterVO.saveToken" />
+			<form:hidden path="repMasterVO.repSn" id="repSn"/>
+			<form:hidden path="repMasterVO.sttusCode"/>
+			<form:hidden path="repMasterVO.repTyCode" value="B002" id="repTyCode"/>
+			<form:hidden path="searchMasterVO.repTyCode" value="B002"/>
+			<form:hidden path="repMasterVO.reportDt"/>
+			<form:hidden path="registerFlag"/>
+            <div class="page-header">
+                <h3 class="page-title"><strong><c:out value="${weekOfYear - 1 }"/>주차 </strong>주간<c:out value="${LEFT_MENU_PROGRMACCESAUTHORVO.progrmNm}"/></h3>
+                <div class="btnbox">
+                	<c:if test="${sttusCode != 'B301'}">
+                    	<button type="button" onclick="fncDownload()" class="btn btn-secondary"><i class="ico-download"></i>다운로드</button>
+                    </c:if>
+                    <c:if test="${LOGIN_USER_VO.userTyCode != 'R002'}">
+                    	<c:if test="${sttusCode == 'B304' || sttusCode == 'B302'}">
+	                    	<button type="button" onclick="fncWrite()" class="btn btn-primary"><i class="ico-save"></i>재작성</button>
+                    	</c:if>
+                    </c:if>
+                    <c:if test="${sttusCode == 'B301'}">
+	                    <button type="button" onclick="fncDelete()" class="btn btn-secondary"><i class="ico-delete"></i>삭제</button>
+	                    <button type="button" onclick="fncUsrSelect()" class="btn btn-dark"><i class="ico-approval"></i>확정</button>
+	                    <button type="button" onclick="fncSave()" class="btn btn-primary"><i class="ico-save"></i>저장</button>
+                    </c:if>
+                    <c:if test="${LOGIN_USER_VO.userId == repFormVO.repMasterVO.confirmUsr && sttusCode == 'B302' }">
+	                    <button type="button" onclick="fncConfirm()" class="btn btn-dark"><i class="ico-approval"></i>확정</button>
+	                    <button type="button" onclick="fncReturnModal()" class="btn btn-secondary"><i class="ico-delete"></i>반려</button>
+                    </c:if>
+                </div>
+            </div>
+            <c:if test='${repFormVO.repMasterVO.returnResn != "" && repFormVO.repMasterVO.returnResn != null && repFormVO.repMasterVO.returnResn != " "}'>
+            <span style="color:red;">반려 사유: <c:out value="${repFormVO.repMasterVO.returnResn }"/></span>
+            </c:if>
+            
+            <div id="hideDiv" style="display:none"></div>
+            <textarea style="width:1500px;height:800px;" id="ir1" name="ir1"></textarea>
+            
+            <!-- confirm Modal -->
+			<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" >
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="container">
+			           <h3 class="form-signin-heading">담당자</h3>
+			           <form:select id="confirmUsr" path="repMasterVO.confirmUsr" class="form-control form-control-sm">
+				          <form:options itemValue="userId" itemLabel="userNm" items="${cstmrList }"/>
+			           </form:select>
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <a onclick="fncConfirm()" class="btn btn-primary" style="color:white;">확인</a>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			
+			<!-- return Modal -->
+			<div class="modal fade" id="returnModal" tabindex="-1" role="dialog" >
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			      </div>
+			      <div class="modal-body">
+			        <div class="container">
+			           <h3 class="form-signin-heading">반려 사유</h3>
+			           <form:input class="control" path="repMasterVO.returnResn"/>
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <a onclick="fncReturn()" class="btn btn-primary" style="color:white;">확인</a>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+        </form:form>
+        
+<script type="text/x-tamplate" id="report-template">
+<table style="width:100%;margin-bottom:30px; border-collapse:separate;empty-cells:show;border-radius:5px;overflow:hidden;border:1px solid #b5c8e0">
+            <colgroup>
+                <col style="width:10%">
+                <col style="width:45%">
+                <col style="width:45%">
+            </colgroup>
+            <c:forEach  items="${repFormVO.repDetailVOList}" var="repDetailVO" varStatus="status">
+            	<input id="${repDetailVO.sysCode }execDesc" type="hidden" name="execDescs">
+	           	<input id="${repDetailVO.sysCode }planDesc" type="hidden" name="planDescs">
+            	<input type="hidden" name="sysCodes" value="${repDetailVO.sysCode }">
+				<input type="hidden" name="repSns" value="${repDetailVO.repSn }">
+                <c:if test="${repDetailVO.sysCode == 'B100' }">
+	                <thead>
+	                    <tr style="font-size: 11pt;" id="name1">
+	                        <th id="B100" scope="row" style="background:#d7e2ef;font-weight:700;border-bottom:1px solid #b5c8e0;border-right:1px solid #b5c8e0">
+	                        </th>
+	                        <th style="background:#d7e2ef;font-weight:700;border-bottom:1px solid #b5c8e0;border-right:1px solid #b5c8e0font-size: 12pt;" scope="col" id="execDesc">
+		                        <c:out value="${repDetailVO.execDesc }" escapeXml="false"/>
+	                        </th>
+	                        <th style="background:#d7e2ef;font-weight:700;border-bottom:1px solid #b5c8e0;border-right:1px solid #b5c8e0font-size: 12pt;"  scope="col" id="planDesc">
+		                        <c:out value="${repDetailVO.planDesc }" escapeXml="false"/>
+	                        </th>
+	                    </tr>
+	               	</thead>
+	                <tbody>
+                </c:if>
+                <c:if test="${repDetailVO.sysCode != 'B100' && repDetailVO.sysCode != 'B129'}">
+                    <tr style="font-size: 11pt;" id="name1">
+                        <th id="${repDetailVO.sysCode }" scope="row" style="border-right:1px solid #b5c8e0;border-top: 1px solid #eaf0f7;background:#f9fbfd;font-weight:500">
+                        	<c:if test="${repDetailVO.sysCodeSubNm1 == '응용(AP)' }">
+                        	<b><c:out value="${repDetailVO.sysCodeNm }" escapeXml="false"/></b><br>
+                        	</c:if>
+                        	<c:if test="${repDetailVO.sysCodeSubNm1 != '응용(AP)' }">
+                        	<b><c:out value="${repDetailVO.sysCodeSubNm1 }" escapeXml="false"/></b><br>
+                        	</c:if>
+                        </th>
+                        <td style="border-top: 1px solid #eaf0f7;border-right:1px solid #d7e2ef;background:#fff;vertical-align:top" class="num" id="execDesc">
+                            <c:out value="${repDetailVO.execDesc }" escapeXml="false"/>
+                        </td>
+                        <td style="border-top: 1px solid #eaf0f7;border-right:1px solid #d7e2ef;background:#fff;vertical-align:top" class="num" id="planDesc">
+                        	<c:out value="${repDetailVO.planDesc }" escapeXml="false"/>
+                        </td>
+                    </tr>
+                </c:if>
+                <c:if test="${repDetailVO.sysCode == 'B129' }">
+					<tr style="font-size: 11pt;" id="name1">
+                        <th id="${repDetailVO.sysCode }" scope="row" style="border-right:1px solid #b5c8e0;border-top: 1px solid #eaf0f7;background:#f9fbfd;font-weight:500">
+                        	<c:if test="${repDetailVO.sysCodeSubNm1 == '응용(AP)' }">
+                        	<b><c:out value="${repDetailVO.sysCodeNm }" escapeXml="false"/></b><br>
+                        	</c:if>
+                        	<c:if test="${repDetailVO.sysCodeSubNm1 != '응용(AP)' }">
+                        	<b><c:out value="${repDetailVO.sysCodeSubNm1 }" escapeXml="false"/></b><br>
+                        	</c:if>
+                        </th>
+                        <td colspan="2" style="border-top: 1px solid #eaf0f7;border-right:1px solid #d7e2ef;background:#fff;vertical-align:top" id="execDesc">
+                             <c:out value="${repDetailVO.execDesc }" escapeXml="false"/>
+                        </td>
+                    </tr>
+				</c:if>
+            </c:forEach>
+            </tbody>
+        </table>
+</script>
+
+<script>
+var oEditors = [];
+$(function(){
+	 nhn.husky.EZCreator.createInIFrame({
+	 oAppRef: oEditors,
+	 elPlaceHolder: "ir1",
+	 sSkinURI: "/smarteditor/SmartEditor2Skin_ko_KR.html",
+	 htParams:{
+		 bUseModeChanger:true
+	 },
+	 
+	 fOnAppLoad:function(){
+		//LOAD_CONTENTS_FIELD - 내용 전체 교체
+		//PASTE_HTML - 내용붙여넣기
+		//UPDATE_CONTENTS_FIELD - HTML 받기
+		oEditors.getById["ir1"].exec("PASTE_HTML",[document.querySelector('#report-template').textContent]);
+		
+	 },
+	 
+	 fCreator: "createSEditor2"
+	});
+})
+	/**
+	 * 문자열에서 모든 교체할 문자열을 대체 문자열로 치환한다.
+	 * @param pattnStr - 찾을 문자열
+	 * @param chngStr - 대체 문자열
+	 * @return 치환된 문자열
+	 */
+	String.prototype.replaceAll = function(pattnStr, chngStr) {
+	
+	    var retsult = "";
+	    var trimStr = this;//.replace(/(^\s*)|(\s*$)/g, "");
+	
+	    if(trimStr && pattnStr != chngStr) {
+	
+	        retsult = trimStr;
+	
+	        while(retsult.indexOf(pattnStr) > -1) {
+	        	
+	            retsult = retsult.replace(pattnStr, chngStr);
+	        }
+	    }
+	
+	    return retsult;
+	};
+	
+	function fncSave(){
+		confirm('저장하시겠습니까?','보고서 저장', null, function(request){
+			if(request){
+				oEditors.getById["ir1"].exec("UPDATE_CONTENTS_FIELD",[])
+				$("#hideDiv").html($("#ir1").val())
+				
+				var sysCodes = $("#hideDiv input[name='sysCodes']");
+				
+				//exec, plan 시스템 코드별 데이터 세팅
+				for(var i=0; i<sysCodes.length; i++){
+					var sysCode = sysCodes[i].value;
+					
+					var execDesc = $("#"+sysCode).siblings("#execDesc").html(); 
+					var planDesc = $("#"+sysCode).siblings("#planDesc").html();
+					
+					$("#"+sysCode+"execDesc").val(execDesc);
+					$("#"+sysCode+"planDesc").val(planDesc);
+
+				}
+				
+				<c:if test="${registerFlag != 'create'}">
+					document.listForm.action = "<c:url value='/itsm/rep/master/mngr/update.do'/>";
+					document.listForm.submit();
+				</c:if>
+			}else{
+				console.log("false")
+			}
+		})
+	}
+	
+	/* 공백 검증하는 메소드*/
+	function isEmpty(str){
+		if(typeof str == "undefined" || str == null || str == "")
+			return true;
+		else
+			return false;
+	}
+
+	function fncDelete(){
+		confirm('정말 삭제하시겠습니까?','포함된 모든 보고서가 삭제됩니다.', null, function(request){
+			if(request){
+				document.listForm.action = "<c:url value='/itsm/rep/master/mngr/delete.do'/>";
+				document.listForm.submit();
+			}
+			
+		})
+	}
+
+	function fncRetrieveList() {
+		document.listForm.repTyCode.value = "B002";
+    	document.listForm.action = "<c:url value='/itsm/rep/master/mngr/retrievePagingList.do'/>";
+       	document.listForm.submit();
+    }
+	
+	function fncConfirm(){
+		confirm('확정하시겠습니까?','확정', null, function(request){
+			if(request){
+				document.listForm.action = "<c:url value='/itsm/rep/master/mngr/confirmRepMaster.do'/>";
+				document.listForm.submit();
+			}
+		}); //confirm 끝
+	}
+  	
+	function fncUsrSelect(){
+		<c:if test="${returnMessage == 'false'}">
+			alert("작성하지 않은 담당자가 있습니다.");
+			return;
+		</c:if>
+		
+        $("#confirmModal").modal("show");
+	}
+	
+	function fncReturnModal(){
+		$("#returnModal").modal("show");
+	}
+	
+	function fncReturn(){
+		confirm('반려하시겠습니까?','반려', null, function(request){
+			if(request){
+				document.listForm.action = "<c:url value='/itsm/rep/master/mngr/returnRepMaster.do'/>";
+				document.listForm.submit();
+			}
+		}); //confirm 끝
+	}
+	function fncWrite(){
+		document.listForm.action = "<c:url value='/itsm/rep/master/mngr/writeRepMaster.do'/>";
+		document.listForm.submit();
+	}
+	
+	/*  
+		보고서 중복검증하는 함수
+	*/
+	function overlapValidation(){
+	    //sysCode 배열로 만들기
+	    var sysValue = $("input[name='sysCodes']").length;
+	    var sysCodes = new Array(sysValue);
+	    for(var i=0; i<sysValue; i++){                          
+	    	sysCodes[i] = $("input[name='sysCodes']")[i].value;
+	    }
+	
+	 	$.ajax({
+	 		type : "post",
+	 		url : "<c:url value='/itsm/rep/detail/mngr/retrieveAjax.do'/>",
+	 		data : {
+	 			"reportDt" : frm.elements.reportDt.value,
+	 			"sysCodes" : sysCodes,
+	 			"repTyCode" : "B002"
+	 		},
+	 		dataType : "json",
+	 		traditional: true,
+	 		success : function(request){
+	 			console.log(request);
+	 			//생성 가능
+	 			if(request.returnMessage == "create"){
+	 				frm.action = "<c:url value='/itsm/rep/detail/mngr/create.do'/>";
+	 				frm.submit();
+	 			}
+	 			//중복된 보고서 있음
+	 			else if(request.returnMessage == "overlap"){
+	 				alert("같은 날짜에 작성된 보고서가 존재합니다.");
+	 				
+	 			//마스터 보고서가 확정됨
+	 			} else if(request.returnMessage == "confirm"){
+	 				alert("같은 날짜에 확정된 보고서가 있습니다. \n관리자에게 문의해주세요.")
+	 			}
+	 		},
+	 		error : function(xhr){
+	 			alert("보고서를 등록하는데 실패하였습니다. 관리자에게 문의해주세요.");
+	 		}
+	 		
+	 	})
+	}
+</script>
+ 
+</body>
+</html>

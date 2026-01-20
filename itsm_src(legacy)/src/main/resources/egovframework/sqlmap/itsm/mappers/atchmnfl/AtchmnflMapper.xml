@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.atchmnfl.dao.AtchmnflMapper">
+
+	<insert id="create" parameterType="kr.go.smplatform.itsm.atchmnfl.vo.AtchmnflVO">
+		<selectKey keyProperty="atchmnflSn" resultType="String" order="BEFORE">
+			SELECT
+				 IFNULL(
+				   (SELECT
+				     MAX(ATCHMNFL_SN) + 1
+				    FROM
+				     TB_ATCHMNFL
+				    WHERE
+				     ATCHMNFL_ID = #{atchmnflId})
+				  ,1)
+				   atchmnflSn
+		</selectKey>
+			INSERT INTO TB_ATCHMNFL(ATCHMNFL_ID
+									  ,ATCHMNFL_SN
+									  ,ORGINL_FILE_NM
+									  ,STRE_ALL_COURS
+									  ,FILE_SIZE
+									  )
+							VALUES (#{atchmnflId}
+							      , #{atchmnflSn}
+							      , #{orginlFileNm}
+							      , #{streAllCours}	      
+							      , #{fileSize}	      
+							      )
+	</insert>
+
+	
+
+	<delete id="delete">
+		DELETE FROM TB_ATCHMNFL
+			  WHERE ATCHMNFL_ID = #{atchmnflId}
+			    AND ATCHMNFL_SN = #{atchmnflSn}
+	</delete>
+
+	<select id="retrieve" resultType="kr.go.smplatform.itsm.atchmnfl.vo.AtchmnflVO">
+			SELECT ATCHMNFL_ID atchmnflId
+			     , ATCHMNFL_SN atchmnflSn
+			     , ORGINL_FILE_NM orginlFileNm
+			     , STRE_ALL_COURS streAllCours
+			     , FILE_SIZE fileSize
+			  FROM TB_ATCHMNFL 
+			 WHERE ATCHMNFL_ID = #{atchmnflId}
+			    AND ATCHMNFL_SN = #{atchmnflSn}
+	</select>
+
+	<select id="retrieveList" parameterType="kr.go.smplatform.itsm.atchmnfl.vo.AtchmnflVO" resultType="kr.go.smplatform.itsm.atchmnfl.vo.AtchmnflVO">
+			SELECT ATCHMNFL_ID atchmnflId
+			     , ATCHMNFL_SN atchmnflSn
+			     , ORGINL_FILE_NM orginlFileNm
+			     , STRE_ALL_COURS streAllCours
+			     , FILE_SIZE fileSize
+			  FROM TB_ATCHMNFL 
+			 WHERE ATCHMNFL_ID = #{atchmnflId}			    
+			  ORDER BY ATCHMNFL_SN ASC
+	</select>
+	
+</mapper>

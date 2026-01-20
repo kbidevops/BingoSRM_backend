@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.repAttd.dao.RepAttdMapper">
+	<select id="retrieveList" parameterType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO" resultType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO">
+		SELECT
+			RA.ATTD_CODE attdCode,
+		    RA.USER_ID userId,
+		    LI.USER_NM userNm,
+		    C.CMMN_CODE_NM attdCodeNm,
+		    RA.ATTD_DT attdDt,
+		    RA.UPDT_DT updtDt,
+		    RA.UPDT_ID updtId,
+		    RA.CREAT_ID creatId,
+		    RA.CREAT_DT creatDt,
+		    LI.USER_LOCATE userLocat
+		FROM
+			TB_REP_ATTD RA
+		JOIN TB_CMMN_CODE C 
+			ON RA.ATTD_CODE = C.CMMN_CODE
+		JOIN TB_LOGIN_INFO LI
+			ON RA.USER_ID = LI.USER_ID
+		<include refid="retrieveListWhere"/>
+	</select>
+	
+	<sql id="retrieveListWhere">
+		<where>
+			DATE_FORMAT(RA.ATTD_DT,'%Y-%m-%d') = DATE_FORMAT(#{attdDt},'%Y-%m-%d')
+			<if test="userId != null and userId != ''">
+			AND RA.USER_ID = #{userId}
+			</if>
+			<if test="attdCode != null and attdCode != ''">
+			AND RA.ATTD_CODE = #{attdCode}
+			</if>
+			<if test="userLocat != null and userLocat != ''">
+			AND LI.USER_LOCATE = #{userLocat}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="retrieve" parameterType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO" resultType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO">
+		SELECT
+			RA.ATTD_CODE attdCode,
+		    RA.USER_ID userId,
+		    C.CMMN_CODE_NM attdCodeNm,
+		    RA.ATTD_DT attdDt,
+		    RA.UPDT_DT updtDt,
+		    RA.UPDT_ID updtId,
+		    RA.CREAT_ID creatId,
+		    RA.CREAT_DT creatDt,
+		    LI.USER_LOCATE userLocat
+		FROM
+			TB_REP_ATTD RA
+		LEFT JOIN	TB_LOGIN_INFO LI
+			    ON	LI.USER_ID = RA.USER_ID
+		LEFT JOIN TB_CMMN_CODE C
+			ON RA.ATTD_CODE = C.CMMN_CODE
+		WHERE RA.ATTD_DT = #{attdDt}
+		  AND RA.USER_ID = #{userId}
+	</select>
+	
+	<insert id="create" parameterType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO">
+	<selectKey order="BEFORE" resultType="String" keyProperty="userLocat">
+		SELECT USER_LOCATE
+		  FROM TB_LOGIN_INFO
+		 WHERE USER_ID = #{userId}
+	</selectKey>
+	
+		INSERT INTO TB_REP_ATTD(USER_ID,
+								ATTD_CODE,
+								ATTD_DT,
+								CREAT_DT,
+								CREAT_ID)
+		VALUES(#{userId},
+			   #{attdCode},
+			   #{attdDt},
+			   NOW(),
+			   #{creatId})
+	</insert>
+	
+	<update id="update" parameterType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO">
+	
+		UPDATE TB_REP_ATTD
+		   SET ATTD_CODE = #{attdCode},
+		   	   UPDT_DT = NOW(),
+		   	   UPDT_ID = #{updtId}
+		 WHERE USER_ID = #{userId}
+		   AND ATTD_DT = #{attdDt}
+		   	  
+	</update>
+	
+	
+	<delete id="delete" parameterType="kr.go.smplatform.itsm.repAttd.vo.RepAttdVO">
+		DELETE FROM TB_REP_ATTD
+		 WHERE USER_ID = #{userId}
+		   AND DATE_FORMAT(ATTD_DT,'%Y-%m-%d') = DATE_FORMAT(#{attdDt},'%Y-%m-%d')
+	</delete>
+	
+</mapper>

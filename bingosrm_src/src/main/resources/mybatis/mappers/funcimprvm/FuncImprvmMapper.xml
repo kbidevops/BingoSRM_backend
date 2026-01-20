@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.funcimprvm.dao.FuncImprvmMapper">
+<sql id="retrieveSelect">
+	SELECT 
+		@rownum:=@rownum+1 as rowNum,
+		FI.FNCT_IMPRVM_NO fnctImprvmNo,
+		SR.SRVC_RSPONS_NO srvcRsponsNo,
+		SR.REQUST_DT requstDt,
+		SR.TRGET_SRVC_CODE trgetSrvcCode,
+		SR.RQESTER_1ST_NM rqester1stNm,
+		SR.RQESTER_1ST_PSITN rqester1stPsitn,
+		CL.CMMN_CODE_NM trgetSrvcCodeNm,
+		LI.USER_NM chargerUserNm,
+		SR.SRVC_RSPONS_SJ srvcRsponsSj,
+		SR.SRVC_RSPONS_CN srvcRsponsCn,
+		SR.PROCESS_MT processMt,
+		CONECT_SYS_YN conectSysYn,
+		CONECT_SYS conectSys,
+		CD.CMMN_CODE_NM conectSysNm,
+		FI_CL fiCl,
+		CC.CMMN_CODE_NM fiClNm,
+		APPLY_PLAN_DT applyPlanDt,
+		APPLY_R_DT applyRDt,
+		CNFRM_YN cnfrmYn,
+		NO_CNFRM_RESN noCnfrmResn,
+		FI_RUN_SVR_YN fiRunSvrYn,
+		FI_DEV_SVR_YN fiDevSvrYn,
+		FI_DB_YN fiDbYn,
+		FI_VM_YN fiVmYn,
+		FI_ETC_YN fiEtcYn,
+		FI_PLAN fiPlan,
+		RQUIRE_DFN_YN rquireDfnYn,
+		RQUIRE_SPC_YN rquireSpcYn,
+		RQUIRE_TRC_YN rquireTrcYn,
+		PCKG_PROGRM_LIST_YN pckgProgrmListYn,
+		UI_DSIGN_YN uiDsignYn,
+		PROGRM_DSIGN_YN progrmDsignYn,
+		TABLE_DSIGN_YN tableDsignYn,
+		PROGRM_LIST_YN progrmListYn,
+		USER_MNUAL_YN userMnualYn,
+		ADMN_MNUAL_YN admnMnualYn,
+		UNIT_TEST_YN unitTestYn,
+		UNION_TEST_YN unionTestYn,
+		CHNGE_PLAN chngePlan,
+		BACKUP_PLAN backupPlan,
+		RSTORE_PLAN rstorePlan,
+		CONSTRNT constrnt,
+		CONSDER consder,
+		FI_ATACHMNFL_ID fiAtchmnflId,
+		NAVIGATION navigation,
+		FI_RQUIRE fiRquire,
+		FI_CN fiCn,
+		ASIS_ATCHMNFL_ID asisAtchmnflId,
+		TOBE_ATCHMNFL_ID tobeAtchmnflId,
+		FI.CREAT_ID creatId,
+		FI.UPDT_ID updtId,
+		FI.CREAT_DT creatDt,	
+		FI.UPDT_DT updtDt,
+		FI.DELETE_YN deleteYn,
+		FI.CONFIRM_USR confirmUsr
+	FROM (select @rownum:=0) TMP,
+		  TB_FNCT_IMPRVM FI
+	LEFT OUTER JOIN TB_CMMN_CODE CC
+                 ON FI.FI_CL = CC.CMMN_CODE
+	LEFT OUTER JOIN TB_SRVC_RSPONS SR 
+                 ON FI.FNCT_IMPRVM_NO = SR.FNCT_IMPRVM_NO
+	LEFT OUTER JOIN TB_LOGIN_INFO LI
+                 ON SR.CHARGER_ID = LI.USER_ID
+	LEFT OUTER JOIN TB_CMMN_CODE CL
+                 ON SR.TRGET_SRVC_CODE = CL.CMMN_CODE
+	LEFT OUTER JOIN TB_CMMN_CODE CD
+                 ON FI.CONECT_SYS = CD.CMMN_CODE
+</sql>
+
+<select id="retrievePagingList" parameterType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO" resultType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO">
+	<include refid="retrieveSelect" />
+	<include refid="retrievePagingListWhere"/>
+	ORDER BY FI.CREAT_DT DESC
+	limit #{firstIndex}, #{recordCountPerPage}
+</select>
+
+<sql id="retrievePagingListWhere">
+	<where>
+			FI.DELETE_YN = 'N'
+		<if test="fnctImprvmNo != null and fnctImprvmNo != ''">
+			AND FI.FNCT_IMPRVM_NO LIKE CONCAT('%', #{fnctImprvmNo},'%')
+		</if>
+		<if test="chargerId != null and chargerId != ''">
+			AND SR.CHARGER_ID = #{chargerId}
+		</if>
+		<if test="trgetSrvcCode != null and trgetSrvcCode != ''">
+			AND SR.TRGET_SRVC_CODE = #{trgetSrvcCode}
+		</if>
+		<if test="processStdrCode != null and processStdrCode != ''">
+			AND SR.PROCESS_STDR_CODE = #{processStdrCode}
+		</if>
+		<if test="srvcRsponsSj != null and srvcRsponsSj != ''">
+		 	AND SR.SRVC_RSPONS_SJ  LIKE CONCAT('%', #{srvcRsponsSj},'%')
+		</if>
+		<if test="srvcRsponsCn != null and srvcRsponsCn != ''">
+		 	AND SR.SRVC_RSPONS_CN  LIKE CONCAT('%', #{srvcRsponsCn},'%')
+		</if>
+	</where>
+</sql>
+
+
+<select id="retrieveList" parameterType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO" resultType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO">
+	<include refid="retrieveSelect" />
+	WHERE 
+		FI.DELETE_YN = 'N'
+	<if test="processMt != null and processMt != ''">
+		AND DATE_FORMAT(FI.CREAT_DT,'%Y%m') = #{processMt}
+	</if>
+	ORDER BY FI.FNCT_IMPRVM_NO ASC
+</select>
+
+<select id="retrieve" parameterType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO" resultType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO">
+	<include refid="retrieveSelect" />
+	WHERE FI.DELETE_YN = 'N'
+	  AND FI.FNCT_IMPRVM_NO = #{fnctImprvmNo}
+	ORDER BY FI.CREAT_DT DESC
+</select>
+
+<insert id="create" parameterType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO">
+<selectKey keyProperty="fnctImprvmNo" resultType="String" order="BEFORE">
+			SELECT
+				 ifnull(
+				   (SELECT
+				     CONCAT(
+				       substring(
+				         MAX(FNCT_IMPRVM_NO)
+				        ,1
+				        ,8)
+				      ,LPAD(
+				         CAST(
+				           substring(
+				             MAX(FNCT_IMPRVM_NO)
+				            ,9) AS UNSIGNED) +
+				         1
+				        ,3
+				        ,'0'))
+				    FROM
+				     TB_FNCT_IMPRVM
+				    WHERE
+				     FNCT_IMPRVM_NO LIKE
+				       concat(
+				         'FI-'
+				        ,date_format(
+				           now()
+				          ,'%y%m')
+				        ,'-%'))
+				  ,concat(
+				     'FI-'
+				    ,date_format(
+				       now()
+				      ,'%y%m')
+				    ,'-001'))
+				   fnctImprvmNo
+</selectKey>
+	INSERT INTO TB_FNCT_IMPRVM(FNCT_IMPRVM_NO 
+			                        , CONECT_SYS_YN  	                        
+			                        , CONECT_SYS 
+			                        , FI_CL 
+			                        , APPLY_PLAN_DT 
+			                        , APPLY_R_DT 
+			                        , CNFRM_YN 
+			                        , NO_CNFRM_RESN 
+			                        , FI_RUN_SVR_YN 
+			                        , FI_DEV_SVR_YN 
+			                        , FI_DB_YN 
+			                        , FI_VM_YN 
+			                        , FI_ETC_YN 
+			                        , FI_PLAN 
+			                        , RQUIRE_DFN_YN 
+			                        , RQUIRE_SPC_YN 
+			                        , RQUIRE_TRC_YN 
+			                        , PCKG_PROGRM_LIST_YN 
+			                        , UI_DSIGN_YN 
+			                        , PROGRM_DSIGN_YN 
+			                        , TABLE_DSIGN_YN 
+			                        , PROGRM_LIST_YN 
+			                        , USER_MNUAL_YN  
+			                        , ADMN_MNUAL_YN  
+			                        , UNIT_TEST_YN  
+			                        , UNION_TEST_YN  
+			                        , CHNGE_PLAN  
+			                        , BACKUP_PLAN   
+			                        , RSTORE_PLAN   
+			                        , CONSTRNT   
+			                        , CONSDER   
+			                        , FI_ATACHMNFL_ID   
+			                        , NAVIGATION   
+			                        , FI_RQUIRE   
+			                        , FI_CN   
+			                        , ASIS_ATCHMNFL_ID   
+			                        , TOBE_ATCHMNFL_ID   
+			                        , CREAT_ID    
+			                        , CREAT_DT    
+			                        , DELETE_YN
+			                        , CONFIRM_USR
+			                        )
+			VALUES (#{fnctImprvmNo}
+			      , #{conectSysYn}
+			      , #{conectSys}
+			      , #{fiCl}
+			      , #{applyPlanDt}
+			      , #{applyRDt}
+			      , #{cnfrmYn}
+			      , #{noCnfrmResn}			      
+			      , #{fiRunSvrYn}			      
+			      , #{fiDevSvrYn}
+			      , #{fiDbYn}
+			      , #{fiVmYn}
+			      , #{fiEtcYn}
+			      , #{fiPlan}
+			      , #{rquireDfnYn}
+			      , #{rquireSpcYn}
+			      , #{rquireTrcYn}
+			      , #{pckgProgrmListYn}
+			      , #{uiDsignYn}
+			      , #{progrmDsignYn}
+			      , #{tableDsignYn}
+			      , #{progrmListYn}
+			      , #{userMnualYn}
+			      , #{admnMnualYn}
+			      , #{unitTestYn}
+			      , #{unionTestYn}
+			      , #{chngePlan}
+			      , #{backupPlan}
+			      , #{rstorePlan}
+			      , #{constrnt}
+			      , #{consder}
+			      , #{fiAtchmnflId}
+			      , #{navigation}
+			      , #{fiRquire}
+			      , #{fiCn}
+			      , #{asisAtchmnflId}
+			      , #{tobeAtchmnflId}
+			      , #{creatId}
+			      , NOW()
+			      , 'N'
+			      , #{confirmUsr}
+			      )
+</insert>
+
+<update id="update" parameterType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO">
+	UPDATE TB_FNCT_IMPRVM
+			   SET UPDT_DT = NOW()
+			     , UPDT_ID = #{updtId}
+			     , CONECT_SYS_YN = #{conectSysYn}
+			     , CONECT_SYS = #{conectSys}
+			     , FI_CL = #{fiCl}
+			     , APPLY_PLAN_DT = #{applyPlanDt}
+			     , APPLY_R_DT = #{applyRDt}
+			     , CNFRM_YN = #{cnfrmYn}
+			     , NO_CNFRM_RESN  = #{noCnfrmResn}
+			     , FI_RUN_SVR_YN = #{fiRunSvrYn}
+			     , FI_DEV_SVR_YN = #{fiDevSvrYn}
+			     , FI_DB_YN = #{fiDbYn}
+			     , FI_VM_YN = #{fiVmYn}
+			     , FI_ETC_YN = #{fiEtcYn}
+			     , FI_PLAN = #{fiPlan}
+			     , RQUIRE_DFN_YN = #{rquireDfnYn}
+			     , RQUIRE_SPC_YN = #{rquireSpcYn}
+			     , RQUIRE_TRC_YN = #{rquireTrcYn}
+			     , PCKG_PROGRM_LIST_YN = #{pckgProgrmListYn}
+			     , UI_DSIGN_YN = #{uiDsignYn}
+			     , PROGRM_DSIGN_YN = #{progrmDsignYn}
+			     , TABLE_DSIGN_YN = #{tableDsignYn}
+			     , PROGRM_LIST_YN = #{progrmListYn}
+			     , USER_MNUAL_YN = #{userMnualYn}
+			     , ADMN_MNUAL_YN = #{admnMnualYn}
+			     , UNIT_TEST_YN = #{unitTestYn}
+			     , UNION_TEST_YN = #{unionTestYn}
+			     , CHNGE_PLAN = #{chngePlan}
+			     , BACKUP_PLAN = #{backupPlan}
+			     , RSTORE_PLAN = #{rstorePlan}
+			     , CONSTRNT = #{constrnt}
+			     , CONSDER = #{consder}
+			     , FI_ATACHMNFL_ID = #{fiAtchmnflId}
+			     , NAVIGATION = #{navigation}
+			     , FI_RQUIRE = #{fiRquire}
+			     , FI_CN = #{fiCn}
+			     , ASIS_ATCHMNFL_ID = #{asisAtchmnflId}
+			     , TOBE_ATCHMNFL_ID  = #{tobeAtchmnflId}
+				 , CONFIRM_USR = #{confirmUsr}
+			WHERE FNCT_IMPRVM_NO = #{fnctImprvmNo}
+</update>
+
+<delete id="delete" parameterType="kr.go.smplatform.itsm.funcimprvm.vo.FuncImprvmVO">
+		UPDATE TB_FNCT_IMPRVM
+			   SET DELETE_YN = 'Y'
+		 WHERE FNCT_IMPRVM_NO= #{fnctImprvmNo}
+</delete>
+
+</mapper>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.user.dao.UserMapper">
+
+    <insert id="create" parameterType="kr.go.smplatform.itsm.user.vo.UserVO">
+
+            INSERT INTO TB_LOGIN_INFO(USER_ID
+                                    , USER_PASSWORD
+                                    , USER_NM
+                                    , USER_TY_CODE
+                                    , USER_STTUS_CODE
+                                    , PSITN
+                                    , CLSF
+                                    , MOBLPHON
+                                    , EMAIL
+                                    , ACNT_REQST_RESN
+                                    , CREAT_DT
+                                    , CREAT_ID
+                                    , UPDT_DT
+                                    , UPDT_ID
+                                    , CONECT_IP)
+            VALUES (#{userId}
+                  , #{userPassword}
+                  , #{userNm}
+                  , #{userTyCode}
+                  , #{userSttusCode}
+                  , #{psitn}
+                  , #{clsf}
+                  , #{moblphon}
+                  , #{email}
+                  , #{acntReqstResn}
+                  , NOW()
+                  , #{creatId}
+                  , NOW()
+                  , #{creatId}
+                  , #{conectIp})
+
+    </insert>
+
+    <update id="update">
+
+            UPDATE TB_LOGIN_INFO
+               SET UPDT_DT = NOW()
+                 , UPDT_ID = #{updtId}
+                <if test="changePasswordYN != null and changePasswordYN == 'Y'.toString()">
+                    , USER_PASSWORD = #{userPassword}
+                    , PASSWORD_UPDT_DT = now()
+                </if>
+                <if test="userNm != null and userNm != ''">
+                    , USER_NM = #{userNm}
+                </if>
+                <if test="userTyCode != null and userTyCode != ''">
+                    , USER_TY_CODE = #{userTyCode}
+                </if>
+                <if test="userSttusCode != null and userSttusCode != ''">
+                    , USER_STTUS_CODE = #{userSttusCode}
+                </if>
+                , PSITN = #{psitn}
+                , CLSF = #{clsf}
+                , MOBLPHON = #{moblphon}
+                , EMAIL = #{email}
+                <if test="acntReqstResn != null and acntReqstResn != ''">
+                    , ACNT_REQST_RESN = #{acntReqstResn}
+                </if>
+                <if test="conectIp != null and conectIp != ''">
+                    , CONECT_IP = #{conectIp}
+                </if>
+                <if test="userSignature != null and userSignature != ''">
+                    , USER_SIGNATURE = #{userSignature}
+                </if>
+            WHERE USER_ID= #{userId}
+
+
+    </update>
+
+    <update id="deleteSignature">
+        UPDATE TB_LOGIN_INFO
+        SET USER_SIGNATURE = null
+        WHERE USER_ID= #{userId}
+    </update>
+
+    <delete id="delete">
+            UPDATE TB_LOGIN_INFO
+               SET USER_STTUS_CODE = #{userSttusCode}
+            WHERE USER_ID= #{userId}
+
+    </delete>
+
+    <select id="retrieve" resultType="kr.go.smplatform.itsm.user.vo.UserVO">
+
+            SELECT LI.USER_ID userId
+                 , LI.USER_PASSWORD userPassword
+                 , LI.USER_NM userNm
+                 , LI.USER_TY_CODE userTyCode
+                 , CT.CMMN_CODE_NM userTyCodeNm
+                 , LI.USER_STTUS_CODE userSttusCode
+                 , CS.CMMN_CODE_NM userSttusCodeNm
+                 , LI.PSITN psitn
+                 , LI.CLSF clsf
+                 , LI.MOBLPHON moblphon
+                 , LI.EMAIL email
+                 , LI.ACNT_REQST_RESN acntReqstResn
+                 , LI.CREAT_DT creatDt
+                 , LI.CREAT_ID creatId
+                 , LC.USER_NM creatUserNm
+                 , LI.UPDT_DT updtDt
+                 , LI.UPDT_ID updtId
+                 , LU.USER_NM updtUserNm
+                 , LI.CONECT_IP conectIp
+                 , LI.USER_LOCATE userLocat
+                 , LI.USER_SIGNATURE userSignature
+                 , SIG.ORGINL_FILE_NM userSignatureFileName
+                 , SIG.FILE_SIZE userSignatureFileSize
+              FROM TB_LOGIN_INFO LI
+                   LEFT OUTER JOIN TB_CMMN_CODE CT
+                      ON LI.USER_TY_CODE = CT.CMMN_CODE AND CT.CMMN_CODE_TY = 'R0'
+                   LEFT OUTER JOIN TB_CMMN_CODE CS
+                      ON LI.USER_STTUS_CODE = CS.CMMN_CODE AND CS.CMMN_CODE_TY = 'U0'
+                   LEFT OUTER JOIN TB_LOGIN_INFO LC ON LI.CREAT_ID = LC.USER_ID
+                   LEFT OUTER JOIN TB_LOGIN_INFO LU ON LI.UPDT_ID = LU.USER_ID
+                LEFT JOIN TB_ATCHMNFL SIG ON SIG.ATCHMNFL_ID = LI.USER_SIGNATURE AND SIG.ATCHMNFL_SN = 1
+            WHERE LI.USER_ID=#{userId}
+
+    </select>
+
+    <select id="retrievePagingList" parameterType="kr.go.smplatform.itsm.user.vo.UserVO" resultType="kr.go.smplatform.itsm.user.vo.UserVO">
+
+            SELECT LI.USER_ID userId
+                 , LI.USER_PASSWORD userPassword
+                 , LI.USER_NM userNm
+                 , LI.USER_TY_CODE userTyCode
+                 , CT.CMMN_CODE_NM userTyCodeNm
+                 , LI.USER_STTUS_CODE userSttusCode
+                 , CS.CMMN_CODE_NM userSttusCodeNm
+                 , LI.PSITN psitn
+                 , LI.CLSF clsf
+                 , LI.MOBLPHON moblphon
+                 , LI.EMAIL email
+                 , LI.ACNT_REQST_RESN acntReqstResn
+                 , LI.CREAT_DT creatDt
+                 , LI.CREAT_ID creatId
+                 , LC.USER_NM creatUserNm
+                 , LI.UPDT_DT updtDt
+                 , LI.UPDT_ID updtId
+                 , LU.USER_NM updtUserNm
+                 , LI.CONECT_IP conectIp
+              FROM TB_LOGIN_INFO LI
+                   LEFT OUTER JOIN TB_CMMN_CODE CT
+                      ON LI.USER_TY_CODE = CT.CMMN_CODE AND CT.CMMN_CODE_TY = 'R0'
+                   LEFT OUTER JOIN TB_CMMN_CODE CS
+                      ON LI.USER_STTUS_CODE = CS.CMMN_CODE AND CS.CMMN_CODE_TY = 'U0'
+                   LEFT OUTER JOIN TB_LOGIN_INFO LC ON LI.CREAT_ID = LC.USER_ID
+                   LEFT OUTER JOIN TB_LOGIN_INFO LU ON LI.UPDT_ID = LU.USER_ID
+             <include refid="retrievePagingListWhere" />
+            ORDER BY LI.USER_STTUS_CODE ASC, LI.USER_TY_CODE ASC ,LI.CREAT_DT DESC
+            limit #{firstIndex}, #{recordCountPerPage}
+    </select>
+
+    <select id="retrievePagingListCnt" parameterType="kr.go.smplatform.itsm.user.vo.UserVO" resultType="int">
+
+            SELECT COUNT(*) totcnt
+            FROM TB_LOGIN_INFO LI
+
+            <include refid="retrievePagingListWhere" />
+    </select>
+
+    <sql id="retrievePagingListWhere">
+        <where>
+         <if test="userId != null and userId != ''">
+            AND LI.USER_ID LIKE CONCAT('%', #{userId},'%')
+         </if>
+         <if test="userSttusCode != null and userSttusCode != ''">
+            AND LI.USER_STTUS_CODE = #{userSttusCode}
+         </if>
+         <if test="userTyCode != null and userTyCode != ''">
+            AND LI.USER_TY_CODE = #{userTyCode}
+         </if>
+         <if test="userTyCode2 != null and userTyCode2 != ''">
+            AND LI.USER_TY_CODE != #{userTyCode2}
+         </if>
+         <if test="userNm != null and userNm != ''">
+            AND LI.USER_NM LIKE CONCAT('%', #{userNm},'%')
+         </if>
+         <if test="psitn != null and psitn != ''">
+            AND LI.PSITN LIKE CONCAT('%', #{psitn},'%')
+         </if>
+         <if test="moblphon != null and moblphon != ''">
+            AND LI.MOBLPHON LIKE CONCAT('%', #{moblphon},'%')
+         </if>
+        </where>
+    </sql>
+
+    <select id="retrieveList" parameterType="kr.go.smplatform.itsm.user.vo.UserVO" resultType="kr.go.smplatform.itsm.user.vo.UserVO">
+
+            SELECT LI.USER_ID userId
+                 , LI.USER_PASSWORD userPassword
+                 , LI.USER_NM userNm
+                 , LI.USER_TY_CODE userTyCode
+                 , CT.CMMN_CODE_NM userTyCodeNm
+                 , LI.USER_STTUS_CODE userSttusCode
+                 , CS.CMMN_CODE_NM userSttusCodeNm
+                 , LI.PSITN psitn
+                 , LI.CLSF clsf
+                 , LI.MOBLPHON moblphon
+                 , LI.EMAIL email
+                 , LI.ACNT_REQST_RESN acntReqstResn
+                 , LI.CREAT_DT creatDt
+                 , LI.CREAT_ID creatId
+                 , LC.USER_NM creatUserNm
+                 , LI.UPDT_DT updtDt
+                 , LI.UPDT_ID updtId
+                 , LU.USER_NM updtUserNm
+                 , LI.CONECT_IP conectIp
+              FROM TB_LOGIN_INFO LI
+                   LEFT OUTER JOIN TB_CMMN_CODE CT
+                      ON LI.USER_TY_CODE = CT.CMMN_CODE AND CT.CMMN_CODE_TY = 'R0'
+                   LEFT OUTER JOIN TB_CMMN_CODE CS
+                      ON LI.USER_STTUS_CODE = CS.CMMN_CODE AND CS.CMMN_CODE_TY = 'U0'
+                   LEFT OUTER JOIN TB_LOGIN_INFO LC ON LI.CREAT_ID = LC.USER_ID
+                   LEFT OUTER JOIN TB_LOGIN_INFO LU ON LI.UPDT_ID = LU.USER_ID
+             <include refid="retrievePagingListWhere" />
+            ORDER BY LI.USER_STTUS_CODE ASC, LI.USER_TY_CODE ASC ,LI.CREAT_DT DESC
+    </select>
+
+    <update id="updatePasswordFailCntAdd">
+            UPDATE TB_LOGIN_INFO
+               SET PASSWORD_FAIL_CNT = ifnull(PASSWORD_FAIL_CNT, 0) +1
+             WHERE USER_ID=#{userId}
+    </update>
+
+    <update id="updatePasswordFailCntReset">
+            UPDATE TB_LOGIN_INFO
+               SET PASSWORD_FAIL_CNT = 0
+             WHERE USER_ID=#{userId}
+    </update>
+    <update id="updatePasswordFailCntOverProcess">
+        UPDATE TB_LOGIN_INFO
+           SET ACNT_REQST_RESN = 'Password mismatch lockout'
+             , USER_STTUS_CODE = 'U003'
+             , UPDT_DT = NOW()
+             , UPDT_ID = #{userId}
+         WHERE USER_ID=#{userId}
+        <![CDATA[   AND PASSWORD_FAIL_CNT > 4  ]]>
+    </update>
+    <select id="retrieveOverPasswordPeriod" resultType="kr.go.smplatform.itsm.user.vo.UserVO">
+            SELECT LI.USER_ID userId
+                 , LI.USER_PASSWORD userPassword
+                 , LI.USER_NM userNm
+                 , LI.USER_TY_CODE userTyCode
+                 , LI.USER_STTUS_CODE userSttusCode
+                 , LI.PSITN psitn
+                 , LI.CLSF clsf
+                 , LI.MOBLPHON moblphon
+                 , LI.EMAIL email
+                 , LI.ACNT_REQST_RESN acntReqstResn
+                 , LI.CREAT_DT creatDt
+                 , LI.CREAT_ID creatId
+                 , LI.UPDT_DT updtDt
+                 , LI.UPDT_ID updtId
+                 , LI.CONECT_IP conectIp
+              FROM TB_LOGIN_INFO LI
+            WHERE LI.USER_ID=#{userId}
+            <![CDATA[   AND ADDDATE(LI.PASSWORD_UPDT_DT, 90) < now() ]]>
+    </select>
+
+</mapper>

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.report.dao.RepDetailMapper">
+	<select id="retrievePagingList" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO" resultType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+		
+		SELECT 
+		    REP.REP_SN repSn,
+		    REP.USER_ID userId,
+		    REP.repNm repNm,
+		    LI.USER_NM userNm,
+		    REP.CREAT_DT creatDt,
+		    REP.UPDT_DT updtDt,
+		    REP.REPORT_DT reportDt
+		FROM
+		    (SELECT 
+		        RD.REP_SN,
+		        RD.USER_ID,
+		        RM.REP_NM repNm,
+		        MAX(RM.REPORT_DT) REPORT_DT,
+		        MAX(RD.CREAT_DT) CREAT_DT,
+		        MAX(RD.UPDT_DT) UPDT_DT
+		    FROM
+		        TB_REP_DETAIL RD
+			LEFT OUTER JOIN
+		    TB_REP_MASTER RM ON RD.REP_SN = RM.REP_SN
+		    <include refid="retrievePagingListWhere"/>
+		    GROUP BY REP_SN , USER_ID
+		    ORDER BY REPORT_DT DESC
+		    limit #{firstIndex}, #{recordCountPerPage}) REP
+			LEFT OUTER JOIN
+		    TB_LOGIN_INFO LI ON REP.USER_ID = LI.USER_ID
+	</select>
+	
+	<select id="retrieveTotalCnt" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO" resultType="Integer">
+		SELECT 
+		    COUNT(REP.REP_SN)
+		FROM
+		    (SELECT 
+		        RD.REP_SN,
+		            RD.USER_ID,
+		            RM.REP_NM repNm,
+		            MAX(RD.CREAT_DT) CREAT_DT,
+		            MAX(RD.UPDT_DT) UPDT_DT
+		    FROM
+		        TB_REP_DETAIL RD
+			LEFT OUTER JOIN
+		    TB_REP_MASTER RM ON RD.REP_SN = RM.REP_SN
+		    <include refid="retrievePagingListWhere"/>
+		    GROUP BY REP_SN , USER_ID
+		    ORDER BY CREAT_DT DESC) REP
+			LEFT OUTER JOIN
+		    TB_LOGIN_INFO LI ON REP.USER_ID = LI.USER_ID
+	</select>
+	
+	<select id="retrieveList" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO" resultType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+		SELECT REP.REP_SN repSn
+				, REP.SYS_CODE sysCode
+		        , CD.CMMN_CODE_NM sysCodeNm
+		        , CD.CMMN_CODE_SUB_NM1 sysCodeSubNm1
+				, REP.USER_ID userId
+		        , LI.USER_NM userNm
+				, EXEC_DESC execDesc
+				, REP.PLAN_DESC planDesc
+				, RM.REPORT_DT reportDt
+				, REP.CREAT_DT creatDt
+				, REP.CREAT_ID creatId
+				, REP.UPDT_DT updtDt
+				, REP.UPDT_ID updtId
+                , RM.sttus_code sttusCode
+		  FROM TB_REP_DETAIL REP
+		  LEFT OUTER JOIN TB_CMMN_CODE CD
+					   ON REP.SYS_CODE = CD.CMMN_CODE
+		  LEFT OUTER JOIN TB_LOGIN_INFO LI
+		               ON REP.USER_ID = LI.USER_ID
+		  LEFT OUTER JOIN TB_REP_MASTER RM
+						ON REP.REP_SN = RM.REP_SN
+		  <include refid="retrieveListWhere"/>
+		  ORDER BY CD.SORT_NO ASC
+	</select>
+	
+	<sql id="retrievePagingListWhere">
+		<where>
+				RD.DELETE_YN = #{deleteYn}
+			<if test="repSn != null and repSn != ''">
+				AND RD.REP_SN = #{repSn}
+			</if>
+			<if test="sysCode != null and sysCode != ''">
+				AND SYS_CODE = #{sysCode}
+			</if>
+			<if test="userId != null and userId != ''">
+			 	AND RD.USER_ID LIKE CONCAT('%' , #{userId} , '%')
+			</if>
+			<if test="reportDt != null">
+			  	AND DATE_FORMAT(RM.REPORT_DT,'%Y-%m-%d') = DATE_FORMAT(#{reportDt},'%Y-%m-%d')
+			</if>
+			<if test="creatDt != null">
+			  	AND DATE_FORMAT(RD.CREAT_DT,'%Y-%m-%d') = DATE_FORMAT(#{creatDt},'%Y-%m-%d')
+			</if>
+			<if test="creatId != null and creatId != ''">
+			 	AND RD.CREAT_ID LIKE CONCAT('%' , #{creatId}, '%')
+			</if>
+			<if test="repTyCode != null and repTyCode != ''">
+				AND RM.REP_TY_CODE = #{repTyCode}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="retrieveListWhere">
+		<where>
+				REP.DELETE_YN = #{deleteYn}
+			<if test="repSn != null and repSn != ''">
+				AND REP.REP_SN = #{repSn}
+			</if>
+			<if test="sysCode != null and sysCode != ''">
+				AND REP.SYS_CODE = #{sysCode}
+			</if>
+			<if test="userId != null and userId != ''">
+			 	AND REP.USER_ID LIKE CONCAT('%' , #{userId} , '%')
+			</if>
+			<if test="reportDt != null">
+			  	AND DATE_FORMAT(RD.REPORT_DT,'%Y-%m-%d') = DATE_FORMAT(#{reportDt},'%Y-%m-%d')
+			</if>
+			<if test="creatId != null and creatId != ''">
+			 	AND REP.CREAT_ID LIKE CONCAT('%' , #{creatId}, '%')
+			</if>
+			<if test="repTyCode != null and repTyCode != ''">
+			 	AND RM.REP_TY_CODE = #{repTyCode}
+			</if>
+		</where>
+	</sql>
+	
+	<insert id="create" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+	<selectKey resultType="String" keyProperty="userId" order="BEFORE">
+		SELECT USER_ID FROM TB_REP_CHARGER
+			WHERE SYS_CODE = #{sysCode}
+			AND DELETE_YN = 'N'
+	</selectKey>
+		
+		INSERT INTO TB_REP_DETAIL(REP_SN
+								 , SYS_CODE
+								 , USER_ID
+								 , EXEC_DESC
+								 , PLAN_DESC
+								 , CREAT_DT
+								 , CREAT_ID
+								 )
+		VALUES (#{repSn}
+			  , #{sysCode}
+			  , #{userId}
+			  , #{execDesc}
+			  , #{planDesc}
+			  , #{creatDt}
+			  , #{creatId}
+				)
+	</insert>
+	
+	<update id="update" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+		UPDATE TB_REP_DETAIL
+		   SET UPDT_DT = NOW()
+		     , UPDT_ID = #{updtId}
+		     <if test="execDesc != null">
+		     	, EXEC_DESC = #{execDesc}
+		     </if>
+		     <if test="planDesc != null">
+		     	, PLAN_DESC = #{planDesc}
+		     </if>
+		     <if test="deleteYn != null and deleteYn != ''">
+		     	, DELETE_YN = #{deleteYn}
+		     </if>
+		WHERE REP_SN = #{repSn}
+		  AND SYS_CODE = #{sysCode}
+	</update>
+	
+	<select id="retrieve" resultType="kr.go.smplatform.itsm.report.vo.RepDetailVO" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+		SELECT RD.REP_SN repSn
+			 , RD.SYS_CODE sysCode
+			 , CD.CMMN_CODE_SUB_NM1 sysCodeSubNm1
+			 , RD.USER_ID userId
+			 , RD.EXEC_DESC execDesc
+			 , RD.PLAN_DESC planDesc
+			 , RD.CREAT_DT creatDt
+			 , RD.CREAT_ID creatId
+			 , RD.UPDT_DT updtDt
+			 , RD.UPDT_ID updtId
+		  FROM TB_REP_DETAIL RD
+ LEFT OUTER JOIN TB_REP_MASTER RM
+		  	  ON RM.REP_SN = RD.REP_SN
+ LEFT OUTER JOIN TB_CMMN_CODE CD
+			  ON RD.SYS_CODE = CD.CMMN_CODE
+		<include refid="retrieveWhere"/>
+	</select>
+	
+	<sql id="retrieveWhere">
+		<where>
+				RD.DELETE_YN = #{deleteYn}
+			<if test="repSn != 0 ">
+				AND RD.REP_SN = #{repSn}
+			</if>
+			<if test="sysCode != null and sysCode != ''">
+				AND SYS_CODE = #{sysCode}
+			</if>
+			<if test="userId != null and userId != ''">
+			 	AND RD.USER_ID LIKE CONCAT('%' , #{userId} , '%')
+			</if>
+			<if test="creatDt != null">
+			  	AND DATE_FORMAT(RD.CREAT_DT,'%Y-%m-%d') = DATE_FORMAT(#{creatDt},'%Y-%m-%d')
+			</if>
+			<if test="creatId != null and creatId != ''">
+			 	AND RD.CREAT_ID LIKE CONCAT('%' , #{creatId}, '%')
+			</if>
+			<if test="repTyCode != null and repTyCode != ''">
+				AND RM.REP_TY_CODE = #{repTyCode}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="retrieveChargeList" resultType="kr.go.smplatform.itsm.report.vo.RepDetailVO" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+	 
+	 SELECT REP.REP_SN repSn
+			, REP.SYS_CODE sysCode
+	        , CD.CMMN_CODE_NM sysCodeNm
+	        , CD.CMMN_CODE_SUB_NM1 sysCodeSubNm1
+			, REP.USER_ID userId
+	        , LI.USER_NM userNm
+			, EXEC_DESC execDesc
+			, REP.PLAN_DESC planDesc
+			, RM.REPORT_DT reportDt
+			, REP.CREAT_DT creatDt
+			, REP.CREAT_ID creatId
+			, REP.UPDT_DT updtDt
+			, REP.UPDT_ID updtId
+	  FROM TB_REP_DETAIL REP
+	  LEFT OUTER JOIN TB_CMMN_CODE CD
+				   ON REP.SYS_CODE = CD.CMMN_CODE
+	  LEFT OUTER JOIN TB_LOGIN_INFO LI
+	               ON REP.USER_ID = LI.USER_ID
+	  LEFT OUTER JOIN tb_sys_charger SC
+				   ON REP.SYS_CODE = SC.SYS_CODE
+				  AND REP.USER_ID = SC.USER_ID
+	 
+	</select>
+	
+	<update id="delete" parameterType="kr.go.smplatform.itsm.report.vo.RepDetailVO">
+		UPDATE TB_REP_DETAIL
+		   SET DELETE_YN = 'Y'
+		 WHERE REP_SN = #{repSn}
+		   AND SYS_CODE = #{sysCode}
+	</update>
+	
+</mapper>

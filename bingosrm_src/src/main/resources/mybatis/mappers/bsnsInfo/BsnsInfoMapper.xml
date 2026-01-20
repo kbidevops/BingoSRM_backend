@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.bsnsInfo.dao.BsnsInfoMapper">
+    <insert id="initBsnsInfo">
+        INSERT ignore tb_bsns_info (info_id, info_logo_a, info_logo_b, info_bsns_name, info_agency, info_bsns_person,
+                                           info_bsns_depart, info_op_charger, info_bsns_charger, info_bsns_manager, info_bsns_period)
+        VALUES (1, null, null, null, null, null, null, null, null, null, null)
+    </insert>
+
+    <select id="selectChargerList" resultType="kr.go.smplatform.itsm.bsnsInfo.vo.ChargerUserInfoVO">
+        select  USER_ID as userId
+                , USER_NM as userName
+                , PSITN as position
+                , CLSF as clsf
+        from    TB_LOGIN_INFO
+        where   USER_TY_CODE = #{userTyCode}
+        and     USER_STTUS_CODE = 'U002'
+    </select>
+
+    <select id="selectBsnsInfo" resultType="kr.go.smplatform.itsm.bsnsInfo.vo.BsnsInfoVO">
+        select  info_logo_a as infoLogoA
+                , info_logo_b as infoLogoB
+                , info_bsns_name as infoBsnsName
+                , info_agency as infoAgency
+                , info_bsns_person as infoBsnsPerson
+                , info_bsns_depart as infoBsnsDepart
+                , info_op_charger as infoOpCharger
+                , info_bsns_charger as infoBsnsCharger
+                , info_bsns_manager as infoBsnsManager
+                , info_bsns_period as infoBsnsPeriod
+        from    TB_BSNS_INFO
+        where   info_id = 1
+    </select>
+
+    <update id="updateBsnsInfo">
+        update  TB_BSNS_INFO
+        set     info_logo_a = #{infoLogoA}
+              , info_logo_b = #{infoLogoB}
+              , info_bsns_name = #{infoBsnsName}
+              , info_agency = #{infoAgency}
+              , info_bsns_person = #{infoBsnsPerson}
+              , info_bsns_depart = #{infoBsnsDepart}
+              , info_op_charger = #{infoOpCharger}
+              , info_bsns_charger = #{infoBsnsCharger}
+              , info_bsns_manager = #{infoBsnsManager}
+              , info_bsns_period = #{infoBsnsPeriod}
+        where   info_id = 1
+    </update>
+</mapper>

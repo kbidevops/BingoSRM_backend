@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+
+    <formset>
+        <form name="funcImprvmFormVO">
+        	<field property="funcImprvmVO.applyPlanDtDisplay" depends="date">
+                <arg0 key="적용예정일" />
+                <var>
+					<var-name>datePatternStrict</var-name>
+					<var-value>yyyy-MM-dd</var-value>
+				</var>
+            </field>
+        	<field property="funcImprvmVO.applyRDtDisplay" depends="date">
+                <arg0 key="적용배포일" />
+                <var>
+					<var-name>datePatternStrict</var-name>
+					<var-value>yyyy-MM-dd</var-value>
+				</var>
+            </field>
+            <field property="funcImprvmVO.navigation" depends="required,maxlength">
+        		<arg0 key="네비게이션" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>100</var-value>
+				</var>
+			</field>
+            <field property="funcImprvmVO.fiRquire" depends="required,maxlength">
+        		<arg0 key="개선요구사항" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>100</var-value>
+				</var>
+			</field>
+            <field property="funcImprvmVO.fiPlan" depends="required,maxlength">
+        		<arg0 key="개선 계획" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>4000</var-value>
+				</var>
+			</field>
+            <field property="funcImprvmVO.fiCn" depends="required,maxlength">
+        		<arg0 key="개선 사항" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>4000</var-value>
+				</var>
+			</field>
+        </form>
+    </formset>
+
+</form-validation>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.sms.dao.SmsMapper">
+    <select id="selectCodes" resultType="kr.go.smplatform.sms.vo.TalkCodesVO">
+        select  (select CMMN_CODE_DC from tb_cmmn_code where CMMN_CODE_TY = 'X0' and DELETE_YN = 'N' and CMMN_CODE = 'X001') as uri
+                , (select CMMN_CODE_DC from tb_cmmn_code where CMMN_CODE_TY = 'X0' and DELETE_YN = 'N' and CMMN_CODE = 'X002') as apiKey
+                , (select CMMN_CODE_DC from tb_cmmn_code where CMMN_CODE_TY = 'X0' and DELETE_YN = 'N' and CMMN_CODE = 'X003') as userId
+                , (select CMMN_CODE_DC from tb_cmmn_code where CMMN_CODE_TY = 'X0' and DELETE_YN = 'N' and CMMN_CODE = 'X004') as profileKey
+                , (select CMMN_CODE_DC from tb_cmmn_code where CMMN_CODE_TY = 'X0' and DELETE_YN = 'N' and CMMN_CODE = 'X005') as templateCode
+    </select>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.hist.use.dao.HistUseMapper">
+
+    <insert id="create" parameterType="kr.go.smplatform.itsm.hist.use.vo.HistUseVO">
+
+            INSERT INTO TB_USE_HIST(SESSION_ID
+                                    , USER_ID
+                                    , USER_TY_CODE
+                                    , USE_DT
+                                    , REQUEST_URI
+                                    , REQUEST_METHOD
+                                    , TITLE
+                                    , MENU_TITLE
+                                    , SUB_MENU_TITLE
+                                    )
+            VALUES (#{sessionId}
+                  , #{userId}
+                  , #{userTyCode}
+                  , NOW()
+                  , #{requestUri}
+                  , #{requestMethod}
+                  , #{title}
+                  , #{menuTitle}
+                  , #{subMenuTitle}
+                  )
+
+    </insert>
+
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+
+    <formset>
+        <form name="srvcRsponsFormVO">
+        	<field property="srvcRsponsVO.requstDtDateDisplay" depends="date">
+                <arg0 key="요청일" />
+                <var>
+					<var-name>datePatternStrict</var-name>
+					<var-value>yyyy-MM-dd</var-value>
+				</var>
+            </field>
+            <field property="srvcRsponsVO.requstDtTimeDisplay" depends="mask">
+                <arg0 key="요청시간" />
+				<var>
+					<var-name>mask</var-name>
+					<var-value>^([1-9]|[01][0-9]|2[0-3]):([0-5][0-9])$</var-value>
+				</var>
+            </field>
+            <field property="srvcRsponsVO.rspons1stDtDateDisplay" depends="date">
+                <arg0 key="1차 응답일" />
+                <var>
+					<var-name>datePatternStrict</var-name>
+					<var-value>yyyy-MM-dd</var-value>
+				</var>
+            </field>
+            <field property="srvcRsponsVO.rspons1stDtTimeDisplay" depends="mask">
+                <arg0 key="1차 응답시간" />
+				<var>
+					<var-name>mask</var-name>
+					<var-value>^([1-9]|[01][0-9]|2[0-3]):([0-5][0-9])$</var-value>
+				</var>
+            </field>
+        	<field property="srvcRsponsVO.rqester1stNm" depends="required,maxlength">
+        		<arg0 key="1차 요청자 이름" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>100</var-value>
+				</var>
+			</field>
+			<field property="srvcRsponsVO.rqester1stPsitn" depends="required,maxlength">
+        		<arg0 key="1차 요청자 소속" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>100</var-value>
+				</var>
+			</field>
+<!--			<field property="srvcRsponsVO.rqester1stCttpc" depends="required,mask">-->
+<!--                <arg0 key="1차 요청자 연락처" />-->
+<!--				<var>-->
+<!--					<var-name>mask</var-name>-->
+<!--					<var-value>^\d{2,3}-\d{3,4}-\d{4}$</var-value>-->
+<!--				</var>-->
+<!--            </field>-->
+            <field property="srvcRsponsVO.rqester1stEmail" depends="email">
+                <arg0 key="1차 요청자 이메일" />                
+            </field>
+            <field property="srvcRsponsVO.srvcRsponsSj" depends="required,maxlength">
+        		<arg0 key="SR 제목" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>100</var-value>
+				</var>
+			</field>
+            <field property="srvcRsponsVO.srvcRsponsCn" depends="required,maxlength">
+        		<arg0 key="SR 요청상세내역" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>4000</var-value>
+				</var>
+			</field>
+			<field property="srvcRsponsVO.processDtDateDisplay" depends="date">
+                <arg0 key="처리일" />
+                <var>
+					<var-name>datePatternStrict</var-name>
+					<var-value>yyyy-MM-dd</var-value>
+				</var>
+            </field>
+            <field property="srvcRsponsVO.processDtTimeDisplay" depends="mask">
+                <arg0 key="처리시간" />
+				<var>
+					<var-name>mask</var-name>
+					<var-value>^([1-9]|[01][0-9]|2[0-3]):([0-5][0-9])$</var-value>
+				</var>
+            </field>
+            <field property="srvcRsponsVO.srvcProcessDtls" depends="maxlength">
+        		<arg0 key="SR 처리내역" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>4000</var-value>
+				</var>
+			</field>
+        </form>
+    </formset>
+
+</form-validation>

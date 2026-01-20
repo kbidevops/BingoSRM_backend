@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+
+    <formset>
+        <form name="progrmVO">
+        	<field property="progrmNm" depends="required,maxlength">
+        		<arg0 key="메뉴명" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>100</var-value>
+				</var>
+			</field>
+			<field property="progrmUri" depends="required,maxlength">
+        		<arg0 key="메뉴URL" />
+        		<arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>2000</var-value>
+				</var>
+			</field>
+            <field property="sortNo" depends="required,integer,maxlength">
+                <arg0 key="정렬순서" />
+                <arg1 name="maxlength" key="${var:maxlength}" resource="false"/>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>11</var-value>
+				</var>
+            </field>
+        </form>
+    </formset>
+
+</form-validation>

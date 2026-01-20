@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.report.dao.RepMasterMapper">
+	<select id="retrievePagingList" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO" resultType="kr.go.smplatform.itsm.report.vo.RepMasterVO">
+		SELECT REP_SN repSn
+			 , LI.USER_NM creatUserNm
+			 , REP_NM repNm
+			 , REP_TY_CODE repTyCode
+			 , RM.CREAT_DT creatDt
+			 , RM.CREAT_ID creatId
+			 , RM.UPDT_DT updtDt
+			 , RM.UPDT_ID updtId
+			 , STTUS_CODE sttusCode
+			 , CMMN_CODE_NM sttusNm
+			 , CONFIRM_USR confirmUsr
+			 , RETURN_RESN returnResn
+			 , REPORT_DT reportDt
+		  FROM TB_REP_MASTER RM
+		  LEFT OUTER JOIN TB_LOGIN_INFO LI
+                 ON RM.CREAT_ID = LI.USER_ID
+		  LEFT OUTER JOIN TB_CMMN_CODE CC
+                 ON RM.STTUS_CODE = CC.CMMN_CODE
+		 <include refid="retrievePagingListWhere"/>
+	  	 ORDER BY RM.REPORT_DT DESC
+	  	 limit #{firstIndex}, #{recordCountPerPage}
+	</select>
+	
+	<select id="totCnt" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO" resultType="integer">
+		SELECT COUNT(RM.REP_SN) 
+		  FROM TB_REP_MASTER RM
+		<include refid="retrievePagingListWhere"/> 
+	</select>
+	
+	<sql id="retrievePagingListWhere">
+		<where>
+				RM.DELETE_YN = 'N'
+			<if test="repSn != null and repSn != ''">
+				AND REP_SN = #{repSn}
+			</if>
+			<if test="repNm != null and repNm != ''">
+				AND REP_NM LIKE CONCAT('%' , #{repNm} , '%')
+			</if>
+			<if test="repTyCode != null and repTyCode != ''">
+				AND REP_TY_CODE = #{repTyCode}
+			</if>
+			<if test="sttusCode != null and sttusCode != ''">
+				AND STTUS_CODE = #{sttusCode}
+			</if>
+			<if test="confirmUsr != null and confirmUsr != ''">
+				AND CONFIRM_USR = #{confirmUsr}
+			</if>
+			<if test="reportDt != null">
+				AND DATE_FORMAT(REPORT_DT,'%Y%m%d') = DATE_FORMAT(#{reportDt},'%Y%m%d')
+			</if>
+			<if test="creatDt != null">
+				AND DATE_FORMAT(RM.CREAT_DT,'%Y%m%d') = DATE_FORMAT(#{creatDt},'%Y%m%d')
+			</if>
+		</where>
+	</sql>
+	
+	<select id="retrieve" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO" resultType="kr.go.smplatform.itsm.report.vo.RepMasterVO">
+		SELECT REP_SN repSn
+			 , REP_NM repNm
+			 , REP_TY_CODE repTyCode
+			 , CREAT_DT creatDt
+			 , CREAT_ID creatId
+			 , UPDT_DT updtDt
+			 , UPDT_ID updtId
+			 , STTUS_CODE sttusCode
+			 , CONFIRM_USR confirmUsr
+			 , RETURN_RESN returnResn
+			 , REPORT_DT reportDt
+		  FROM TB_REP_MASTER RM
+		 <include refid="retrievePagingListWhere"/>
+	</select>
+	
+	<insert id="create" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO" useGeneratedKeys="true" keyProperty="repSn">
+		
+		INSERT INTO TB_REP_MASTER(REP_NM
+								 , REP_TY_CODE
+								 , REPORT_DT
+								 , CREAT_DT
+								 , CREAT_ID
+								 , STTUS_CODE
+								 , CONFIRM_USR)
+								 
+		VALUES (
+				<if test="repTyCode == 'B001'">
+					CONCAT(DATE_FORMAT(#{reportDt},'%y%m%d'),' 업무보고서')
+				</if>
+				<if test="repTyCode == 'B002'">
+					(SELECT CONCAT('주간업무보고(', WEEKOFYEAR(DATE_FORMAT(#{reportDt},'%y%m%d')), '주차)'))
+				</if>
+				<if test="repTyCode == 'B003'">
+					(SELECT CONCAT(MONTH(DATE_FORMAT(#{reportDt},'%y%m%d')), '월 월간업무보고'))
+				</if>
+			  , #{repTyCode}
+			  , #{reportDt}
+			  , NOW()
+            , (select user_id
+               from tb_rep_charger
+               where sys_code = concat('B1', substring(#{repTyCode}, 4, 1), '0')
+                 and delete_YN = 'N'
+               order by user_id
+                limit 1)
+			  , 'B301'
+            , (select user_id
+               from tb_rep_charger
+               where sys_code = concat('B1', substring(#{repTyCode}, 4, 1), '0')
+                 and delete_YN = 'N'
+               order by user_id
+                limit 1)
+                )
+	</insert>
+	
+	<update id="update" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO">
+	
+		UPDATE TB_REP_MASTER
+		   SET  UPDT_ID = #{updtId}
+		  	  , UPDT_DT = NOW()
+		   <if test="sttusCode != null and sttusCode != ''">
+		   	  , STTUS_CODE = #{sttusCode}
+		   </if>
+		   <if test="confirmUsr != null and confirmUsr != ''">
+		   	  , CONFIRM_USR = #{confirmUsr}
+		   </if>
+		   <if test="returnResn != null and returnResn != ''">
+		  	 , RETURN_RESN = #{returnResn}
+		   </if>
+		WHERE REP_SN = #{repSn}
+		
+	</update>
+	
+	<select id="lastInsertedId" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO" resultType="Integer">
+		SELECT REP_SN repSn 
+		  FROM TB_REP_MASTER RM
+		 WHERE RM.DELETE_YN = 'N'
+		<if test="repTyCode != null and repTyCode != ''">
+			AND REP_TY_CODE = #{repTyCode}
+		</if>
+		<if test="reportDt != null">
+			AND DATE_FORMAT(REPORT_DT, '%Y%m%d') <![CDATA[<]]>  DATE_FORMAT(#{reportDt}, '%Y%m%d')
+		</if>
+		 ORDER BY RM.REPORT_DT DESC
+         LIMIT 1
+	</select>
+	
+	<delete id="delete" parameterType="kr.go.smplatform.itsm.report.vo.RepMasterVO">
+		UPDATE TB_REP_MASTER
+		   SET DELETE_YN = 'Y'
+		WHERE REP_SN = #{repSn}
+	</delete>
+
+	<select id="selectAttachments" resultType="kr.go.smplatform.itsm.report.vo.RepAttachmentNameAndSizeVO">
+		SELECT  tra.required_file as requiredFileId
+                , ta1.ORGINL_FILE_NM as requiredFileName
+                , ta1.FILE_SIZE as requiredFileSize
+                , tra.additional_file as additionalFileId
+                , ta2.ORGINL_FILE_NM as additionalFileName
+                , ta2.FILE_SIZE as additionalFileSize
+
+                , A.rep_sn as repSn
+			    , A.user_id as userId
+		FROM (select distinct rep_sn, user_id
+			  from TB_REP_DETAIL
+			  where sys_code != 'B100'
+			  and	substring(sys_code, 4, 1) = '0'
+			  and   rep_sn = #{repSn}) A
+         LEFT JOIN   TB_REP_ATCHMNFL tra
+             ON  tra.user_id = A.user_id
+             AND tra.rep_sn = A.rep_sn
+         LEFT JOIN   TB_ATCHMNFL ta1
+             ON  tra.required_file = ta1.atchmnfl_ID
+             AND ta1.atchmnfl_SN = 1
+         LEFT JOIN   TB_ATCHMNFL ta2
+             ON  tra.additional_file = ta2.atchmnfl_ID
+             AND ta2.atchmnfl_SN = 1
+	</select>
+</mapper>

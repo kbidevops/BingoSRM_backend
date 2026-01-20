@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.go.smplatform.itsm.config.dao.ConfigMapper">
+    <select id="selectResponseRequired" resultType="kr.go.smplatform.itsm.config.vo.ResponseRequiredVO">
+        select  li.MOBLPHON phone
+                , li.USER_ID userId
+        from    TB_SRVC_RSPONS sr
+        left join TB_SYS_CHARGER sc
+            on  sr.TRGET_SRVC_CODE = sc.sys_code
+        left join TB_LOGIN_INFO li
+            on  sc.user_id = li.USER_ID
+        where   sr.RSPONS_1ST_DT is null
+        and     sr.SMS_CHK != 'Y'
+        and     li.MOBLPHON is not null
+        and     li.MOBLPHON != ''
+        group by li.MOBLPHON, li.USER_ID
+    </select>
+
+    <update id="updateChkY">
+        update  TB_SRVC_RSPONS
+        set     SMS_CHK = 'Y'
+        where   TRGET_SRVC_CODE in (
+            select SYS_CODE
+            from tb_sys_charger
+            where USER_ID = #{userId}
+        )
+    </update>
+</mapper>
