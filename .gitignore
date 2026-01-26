@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+.m2/
+.DS_Store
+*.iml
+**/target/
+api-test.http
+itsm 개발환경.txt
+메뉴얼/
+itsmdb_2512.sql
+6. WBS(BingoSRM).xlsx
+BingoSRM_frontend-main/
+.gitignore
