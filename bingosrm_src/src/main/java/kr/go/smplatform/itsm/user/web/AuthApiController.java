@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.go.smplatform.itsm.hist.login.service.HistLoginService;
 import kr.go.smplatform.itsm.hist.login.vo.HistLoginVO;
+import kr.go.smplatform.itsm.progrmaccesauthor.service.ProgrmAccesAuthorService;
+import kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO;
 import kr.go.smplatform.itsm.user.service.UserService;
 import kr.go.smplatform.itsm.user.vo.UserVO;
 
@@ -26,10 +28,13 @@ public class AuthApiController {
 
     private final UserService userService;
     private final HistLoginService histLoginService;
+    private final ProgrmAccesAuthorService progrmAccesAuthorService;
 
-    public AuthApiController(UserService userService, HistLoginService histLoginService) {
+    public AuthApiController(UserService userService, HistLoginService histLoginService,
+                             ProgrmAccesAuthorService progrmAccesAuthorService) {
         this.userService = userService;
         this.histLoginService = histLoginService;
+        this.progrmAccesAuthorService = progrmAccesAuthorService;
     }
 
     @PostMapping("/login")
@@ -75,6 +80,10 @@ public class AuthApiController {
 
             UserVO overPasswordUserVO = userService.retrieveOverPasswordPeriod(user);
             response.put("passwordExpired", overPasswordUserVO != null);
+
+            ProgrmAccesAuthorVO accessParam = new ProgrmAccesAuthorVO();
+            accessParam.setProgrmAccesAuthorCode(existUserVO.getUserTyCode());
+            response.put("assigned", progrmAccesAuthorService.retrieveAssignList(accessParam));
 
             return ResponseEntity.ok(response);
         }
