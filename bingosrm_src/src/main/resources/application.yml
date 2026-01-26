@@ -16,4 +16,4 @@ mybatis:
 
 itsm:
   security:
-    enforce-permissions: true
+    enforce-permissions: false
