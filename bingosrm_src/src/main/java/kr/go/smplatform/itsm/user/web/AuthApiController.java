@@ -1,6 +1,6 @@
 package kr.go.smplatform.itsm.user.web;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +46,7 @@ public class AuthApiController {
         UserVO existUserVO = userService.retrieve(user);
         user.encodeUserPassword();
 
-        Map<String, Object> response = new HashMap<String, Object>();
+        Map<String, Object> response = new LinkedHashMap<String, Object>();
 
         if (existUserVO != null
                 && !GenericValidator.isBlankOrNull(existUserVO.getUserPassword())
@@ -66,7 +66,6 @@ public class AuthApiController {
             }
 
             response.put("authenticated", true);
-            response.put("userId", existUserVO.getUserId());
             response.put("userTyCode", existUserVO.getUserTyCode());
             response.put("userSttusCode", existUserVO.getUserSttusCode());
 
@@ -80,6 +79,7 @@ public class AuthApiController {
 
             UserVO overPasswordUserVO = userService.retrieveOverPasswordPeriod(user);
             response.put("passwordExpired", overPasswordUserVO != null);
+            response.put("userId", existUserVO.getUserId());
 
             ProgrmAccesAuthorVO accessParam = new ProgrmAccesAuthorVO();
             accessParam.setProgrmAccesAuthorCode(existUserVO.getUserTyCode());
