@@ -13,28 +13,57 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import kr.go.smplatform.itsm.progrmaccesauthor.service.ProgrmAccesAuthorService;
 import kr.go.smplatform.itsm.progrmaccesauthor.vo.ProgrmAccesAuthorVO;
+import kr.go.smplatform.itsm.security.JwtService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 
 @Component
 public class ApiAccessInterceptor implements HandlerInterceptor {
     private final ProgrmAccesAuthorService progrmAccesAuthorService;
+    private final JwtService jwtService;
 
     @Value("${itsm.security.enforce-permissions:false}")
     private boolean enforcePermissions;
 
-    public ApiAccessInterceptor(ProgrmAccesAuthorService progrmAccesAuthorService) {
+    public ApiAccessInterceptor(ProgrmAccesAuthorService progrmAccesAuthorService, JwtService jwtService) {
         this.progrmAccesAuthorService = progrmAccesAuthorService;
+        this.jwtService = jwtService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (!enforcePermissions || isExcluded(request)) {
+        if (isExcluded(request)) {
             return true;
         }
 
-        String userTyCode = request.getHeader("X-User-Ty-Code");
-        if (userTyCode == null || userTyCode.isEmpty()) {
-            writeError(response, HttpStatus.UNAUTHORIZED, "Missing X-User-Ty-Code header.");
+        String token = jwtService.resolveToken(request);
+        if (token == null) {
+            writeError(response, HttpStatus.UNAUTHORIZED, "Missing Authorization token.");
             return false;
+        }
+
+        String userTyCode = null;
+        try {
+            Claims claims = jwtService.parseAccessToken(token);
+            Object claimValue = claims.get("userTyCode");
+            if (claimValue != null) {
+                userTyCode = claimValue.toString();
+            }
+        } catch (JwtException ex) {
+            writeError(response, HttpStatus.UNAUTHORIZED, "Invalid or expired token.");
+            return false;
+        }
+
+        if ((userTyCode == null || userTyCode.isEmpty()) && enforcePermissions) {
+            userTyCode = request.getHeader("X-User-Ty-Code");
+        }
+        if (userTyCode == null || userTyCode.isEmpty()) {
+            writeError(response, HttpStatus.UNAUTHORIZED, "Missing user type code.");
+            return false;
+        }
+
+        if (!enforcePermissions) {
+            return true;
         }
 
         ProgrmAccesAuthorVO param = new ProgrmAccesAuthorVO();

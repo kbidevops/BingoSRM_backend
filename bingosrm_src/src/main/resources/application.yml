@@ -17,3 +17,7 @@ mybatis:
 itsm:
   security:
     enforce-permissions: false
+    jwt:
+      secret: ${ITSM_JWT_SECRET:bingosrm-default-jwt-secret-change-this-please}
+      access-token-exp-seconds: 3600
+      refresh-token-exp-seconds: 604800
