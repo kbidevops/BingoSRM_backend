@@ -18,7 +18,8 @@
                                     , CREAT_ID
                                     , UPDT_DT
                                     , UPDT_ID
-                                    , CONECT_IP)
+                                    , CONECT_IP
+                                    , USER_LOCATE)
             VALUES (#{userId}
                   , #{userPassword}
                   , #{userNm}
@@ -33,7 +34,8 @@
                   , #{creatId}
                   , NOW()
                   , #{creatId}
-                  , #{conectIp})
+                  , #{conectIp}
+                  , #{userLocat})
 
     </insert>
 
@@ -68,6 +70,7 @@
                 <if test="userSignature != null and userSignature != ''">
                     , USER_SIGNATURE = #{userSignature}
                 </if>
+                , USER_LOCATE = #{userLocat}
             WHERE USER_ID= #{userId}
 
 
