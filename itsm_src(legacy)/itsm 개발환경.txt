@@ -1,0 +1,18 @@
+개발도구
+
+전자정부 프레임워크 4.10-64 비트
+
+eGovFrameDev-4.1.0-64bit
+
+java JDK 17 (안되면 jdk 11)
+
+mariadb 10.4
+
+
+관리자 계정
+id: admin
+pass: admin1234
+
+Db 계정
+Id: itsm
+Pass: Itsm!2345
